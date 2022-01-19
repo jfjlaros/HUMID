@@ -3,7 +3,7 @@ MAIN := dedup.cc
 LIBS := ../lib/ngs/ngs
 
 CC := g++
-CC_ARGS := -O2
+CC_ARGS := -O2 -fcoroutines -std=c++20
 
 
 OBJS := $(addsuffix .o, $(LIBS))

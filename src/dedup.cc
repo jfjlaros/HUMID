@@ -1,46 +1,50 @@
-#include <fstream>
-#include <ios>
 #include <iostream>
-#include <vector>
 
 #include "../../src/trie.tcc"
 #include "../lib/ngs/ngs.h"
 
+using std::cerr;
 using std::cout;
-using std::ios;
 
-const char file[] = "../../data/100k.bin";
+char const name[] = "../../data/100k.bin";
 
-
-class NLeaf : public Leaf<size_t> {
-  public:
-    size_t line = 0;
-
-    void add(size_t& l) { line = l; }
+struct NLeaf : Leaf {
+  vector<size_t> neighbours;
 };
-
-void visit(vector<uint8_t>& word, NLeaf& leaf) {
-  for (uint8_t letter: word) {
-    cout << (int)letter << ' ';
-  }
-  cout << leaf.line << '\n';
-}
 
 
 int main(void) {
   Trie<4, NLeaf> trie;
 
-  ifstream handle(file, ios::in | ios::binary);
+  cerr << time(NULL) << " Reading data.\n";
   size_t line = 0;
-  while (!handle.eof()) {
-    vector<uint8_t> word = readWord(handle, 24);
-    trie.add(word, line);
-    line++;
-    handle.peek();
+  for (vector<uint8_t> word: readFile(name, 24)) {
+    NLeaf* leaf = trie.add(word);
+    leaf->neighbours.push_back(line++);
   }
-  handle.close();
 
-  trie.traverse(visit);
+  cerr << time(NULL) << " Calculating neighbours.\n";
+  for (Result<NLeaf> walkResult: trie.walk()) {
+    for (Result<NLeaf> hammingResult: trie.hamming(walkResult.path, 1)) {
+      if (walkResult.leaf != hammingResult.leaf) {
+        walkResult.leaf->neighbours.insert(
+          walkResult.leaf->neighbours.end(),
+          hammingResult.leaf->neighbours.begin(),
+          hammingResult.leaf->neighbours.end());
+      }
+    }
+  }
+
+  cerr << time(NULL) << " Writing results.\n";
+  for (Result<NLeaf> result: trie.walk()) {
+    cout << result.leaf->neighbours[0] << ':';
+    for (size_t neighbour: result.leaf->neighbours) {
+      cout << ' ' << neighbour;
+    }
+    cout << '\n';
+  }
+
+  cerr << time(NULL) << " Done.\n";
 
   return 0;
 }
