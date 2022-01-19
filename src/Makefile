@@ -1,6 +1,8 @@
 EXEC := dedup
 MAIN := dedup.cc
-LIBS := ../lib/ngs/ngs
+LIBS := ../lib/ngs/ngs ../lib/commandIO/src/error \
+  ../lib/commandIO/src/plugins/cli/io ../lib/commandIO/src/plugins/repl/io
+
 
 CC := g++
 CC_ARGS := -O2 -fcoroutines -std=c++20

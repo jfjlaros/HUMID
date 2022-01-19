@@ -1,29 +1,37 @@
-#include <iostream>
+#include <string>
+
+#include "../lib/commandIO/src/commandIO.h"
 
 #include "../../src/trie.tcc"
 #include "../lib/ngs/ngs.h"
 
-using std::cerr;
-using std::cout;
-
-char const name[] = "../../data/100k.bin";
+using std::ios;
+using std::ofstream;
+using std::string;
 
 struct NLeaf : Leaf {
   vector<size_t> neighbours;
 };
 
 
-int main(void) {
+void logMessage(ofstream& log, char const message[]) {
+  log << time(NULL) << ' ' << message;
+  log.flush();
+}
+
+void dedup(
+    string inputName, size_t length, string outputName, string logName) {
   Trie<4, NLeaf> trie;
 
-  cerr << time(NULL) << " Reading data.\n";
+  ofstream log(logName.c_str(), ios::in | ios::binary);
+  logMessage(log, "Reading data.\n");
   size_t line = 0;
-  for (vector<uint8_t> word: readFile(name, 24)) {
+  for (vector<uint8_t> word: readFile(inputName.c_str(), length)) {
     NLeaf* leaf = trie.add(word);
     leaf->neighbours.push_back(line++);
   }
 
-  cerr << time(NULL) << " Calculating neighbours.\n";
+  logMessage(log, "Calculating neighbours.\n");
   for (Result<NLeaf> walkResult: trie.walk()) {
     for (Result<NLeaf> hammingResult: trie.hamming(walkResult.path, 1)) {
       if (walkResult.leaf != hammingResult.leaf) {
@@ -35,16 +43,32 @@ int main(void) {
     }
   }
 
-  cerr << time(NULL) << " Writing results.\n";
+  logMessage(log, "Writing results.\n");
+  ofstream output(outputName.c_str(), ios::in | ios::binary);
   for (Result<NLeaf> result: trie.walk()) {
-    cout << result.leaf->neighbours[0] << ':';
+    output << result.leaf->neighbours[0] << ':';
     for (size_t neighbour: result.leaf->neighbours) {
-      cout << ' ' << neighbour;
+      output << ' ' << neighbour;
     }
-    cout << '\n';
+    output << '\n';
   }
+  output.close();
 
-  cerr << time(NULL) << " Done.\n";
+  logMessage(log, "Done.\n");
+  log.close();
+}
+
+
+int main(int argc, char* argv[]) {
+  CliIO io(argc, argv);
+
+  interface(
+    io,
+    dedup, argv[0], "Deduplicate a dataset.", 
+      param("input", "input file name"),
+      param("length", "word length"),
+      param("-o", "/dev/stdout", "output file name"),
+      param("-l", "/dev/stderr", "log file name"));
 
   return 0;
 }
