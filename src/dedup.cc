@@ -10,12 +10,31 @@ using std::ofstream;
 using std::string;
 
 struct NLeaf : Leaf {
-  vector<size_t> neighbours;
+  vector<size_t> lines;
+  vector<NLeaf*> neighbours;
+  size_t cluster = 0;
 };
 
 
-void logMessage(ofstream& log, char const message[]) {
-  log << time(NULL) << ' ' << message;
+void assignCluster(NLeaf* leaf, size_t cluster) {
+  leaf->cluster = cluster;
+  for (NLeaf* neighbour: leaf->neighbours) {
+    if (!neighbour->cluster) {
+      assignCluster(neighbour, cluster);
+    }
+  }
+}
+
+time_t startMessage(ofstream& log, char const message[]) {
+  log << message << "... ";
+  log.flush();
+
+  return time(NULL);
+}
+
+void endMessage(ofstream& log, time_t start) {
+  unsigned int seconds = (unsigned int)difftime(time(NULL), start);
+  log << "done. (" << seconds / 60 << 'm' << seconds % 60 << "s)\n";
   log.flush();
 }
 
@@ -23,38 +42,45 @@ void dedup(
     string inputName, size_t length, string outputName, string logName) {
   Trie<4, NLeaf> trie;
 
-  ofstream log(logName.c_str(), ios::in | ios::binary);
-  logMessage(log, "Reading data.\n");
+  ofstream log(logName.c_str(), ios::out | ios::binary);
+  time_t start = startMessage(log, "Reading data");
   size_t line = 0;
   for (vector<uint8_t> word: readFile(inputName.c_str(), length)) {
     NLeaf* leaf = trie.add(word);
-    leaf->neighbours.push_back(line++);
+    leaf->lines.push_back(line++);
   }
+  endMessage(log, start);
 
-  logMessage(log, "Calculating neighbours.\n");
+  start = startMessage(log, "Calculating neighbours");
   for (Result<NLeaf> walkResult: trie.walk()) {
     for (Result<NLeaf> hammingResult: trie.hamming(walkResult.path, 1)) {
       if (walkResult.leaf != hammingResult.leaf) {
-        walkResult.leaf->neighbours.insert(
-          walkResult.leaf->neighbours.end(),
-          hammingResult.leaf->neighbours.begin(),
-          hammingResult.leaf->neighbours.end());
+        walkResult.leaf->neighbours.push_back(hammingResult.leaf);
+        hammingResult.leaf->neighbours.push_back(walkResult.leaf);
       }
     }
   }
+  endMessage(log, start);
 
-  logMessage(log, "Writing results.\n");
-  ofstream output(outputName.c_str(), ios::in | ios::binary);
+  start = startMessage(log, "Calculating clusters");
+  size_t cluster = 1;
   for (Result<NLeaf> result: trie.walk()) {
-    output << result.leaf->neighbours[0] << ':';
-    for (size_t neighbour: result.leaf->neighbours) {
-      output << ' ' << neighbour;
+    if (!result.leaf->cluster) {
+      assignCluster(result.leaf, cluster++);
     }
-    output << '\n';
+  }
+  endMessage(log, start);
+
+  startMessage(log, "Writing results");
+  ofstream output(outputName.c_str(), ios::out | ios::binary);
+  for (Result<NLeaf> result: trie.walk()) {
+    for (size_t line: result.leaf->lines) {
+      output << line << ' ' << result.leaf->cluster << '\n';
+    }
   }
   output.close();
+  endMessage(log, start);
 
-  logMessage(log, "Done.\n");
   log.close();
 }
 
