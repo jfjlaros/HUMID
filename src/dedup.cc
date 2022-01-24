@@ -64,21 +64,23 @@ void endMessage(ofstream& log, time_t start) {
 /*!
  * Determine duplicates.
  *
- * \param inputName File containing binary encoded reads.
+ * \param read1 FastQ file for read 1.
+ * \param read2 FastQ file for read 2.
+ * \param umi FastQ file for the UMI.
  * \param length Read length.
  * \param distance Maximum hamming distance between reads.
  * \param outputName Output file.
  * \param logName Log file.
  */
 void dedup(
-    string inputName, size_t length, size_t distance,
+    string read1, string read2, string umi, size_t length, size_t distance,
     string outputName, string logName) {
   Trie<4, NLeaf> trie;
 
   ofstream log(logName.c_str(), ios::out | ios::binary);
   time_t start = startMessage(log, "Reading data");
   size_t line = 0;
-  for (vector<uint8_t> word: readFile(inputName.c_str(), length)) {
+  for (vector<uint8_t> word: readFiles(read1, read2, umi, length)) {
     NLeaf* leaf = trie.add(word);
     leaf->lines.push_back(line++);
   }
@@ -119,10 +121,9 @@ void dedup(
 
   log
     << "\nRead " << line << " lines of length " << length << ".\n"
-    << "Found " << cluster - 1 << " clusters.\n"
-    << "Unique after perfect deduplication: " << nonDuplicates << " ("
+    << "Left after removing perfect duplicates: " << nonDuplicates << " ("
       << 100 * (float)nonDuplicates / line << "%).\n"
-    << "Unique after nonperfect deduplication (distance " << distance
+    << "Left after removing nonperfect duplicates (distance " << distance
       << "): " << cluster - 1 << " ("
       << 100 * (float)(cluster - 1) / line << "%).\n";
 
@@ -139,7 +140,9 @@ int main(int argc, char* argv[]) {
   interface(
     io,
     dedup, argv[0], "Deduplicate a dataset.", 
-      param("input", "input file name"),
+      param("read1", "FastQ file for read 1"),
+      param("read2", "FastQ file for read 2"),
+      param("umi", "FastQ file for the UMI"),
       param("length", "word length"),
       param("-d", 1, "distance"),
       param("-o", "/dev/stdout", "output file name"),
