@@ -21,10 +21,10 @@ all: $(EXEC)
 $(EXEC): $(MAIN) $(OBJS)
 	$(CC) $(CC_ARGS) -o $@ $^ $(LD_ARGS)
 
-%.o: %.c
+%.o: %.cc
 	$(CC) $(CC_ARGS) -o $@ -c $<
 
-%.o: %.cc
+%.o: %.cpp
 	$(CC) $(CC_ARGS) -o $@ -c $<
 
 clean:

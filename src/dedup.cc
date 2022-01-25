@@ -9,13 +9,22 @@ using std::ios;
 using std::ofstream;
 using std::string;
 
+struct Cluster {
+  size_t id;
+  bool visited = false;
+
+  Cluster(size_t id) { this->id = id; }
+};
+
 /*!
  * Leaf structure for neighbour finding.
  */
 struct NLeaf : Leaf {
   vector<size_t> lines;
   vector<NLeaf*> neighbours;
-  size_t cluster = 0;
+  Cluster* cluster = NULL;
+
+  ~NLeaf(void) { if (cluster) { delete cluster; } };
 };
 
 
@@ -23,9 +32,9 @@ struct NLeaf : Leaf {
  * Traverse neighbours to assign cluster IDs.
  *
  * \param leaf Leaf node.
- * \param cluster Cluster ID.
+ * \param cluster Cluster.
  */
-void assignCluster(NLeaf* leaf, size_t cluster) {
+void assignCluster(NLeaf* leaf, Cluster* cluster) {
   leaf->cluster = cluster;
   for (NLeaf* neighbour: leaf->neighbours) {
     if (!neighbour->cluster) {
@@ -79,10 +88,14 @@ void dedup(
 
   ofstream log(logName.c_str(), ios::out | ios::binary);
   time_t start = startMessage(log, "Reading data");
+  size_t total = 0;
   size_t line = 0;
-  for (vector<uint8_t> word: readFiles(read1, read2, umi, length)) {
-    NLeaf* leaf = trie.add(word);
-    leaf->lines.push_back(line++);
+  for (Word word: readFiles(read1, read2, umi, length)) {
+    if (!word.filtered) {
+      NLeaf* leaf = trie.add(word.data);
+      leaf->lines.push_back(line++);
+    }
+    total++;
   }
   endMessage(log, start);
 
@@ -101,31 +114,49 @@ void dedup(
   endMessage(log, start);
 
   start = startMessage(log, "Calculating clusters");
-  size_t cluster = 1;
+  size_t id = 0;
   for (Result<NLeaf> result: trie.walk()) {
     if (!result.leaf->cluster) {
-      assignCluster(result.leaf, cluster++);
+      Cluster* cluster = new Cluster(id++);
+      assignCluster(result.leaf, cluster);
     }
   }
   endMessage(log, start);
 
-  startMessage(log, "Writing results");
+/*
+  start = startMessage(log, "Writing results");
   ofstream output(outputName.c_str(), ios::out | ios::binary);
   for (Result<NLeaf> result: trie.walk()) {
     for (size_t line: result.leaf->lines) {
-      output << line << ' ' << result.leaf->cluster << '\n';
+      output << line << ' ' << result.leaf->cluster->id << '\n';
     }
   }
   output.close();
   endMessage(log, start);
+  */
+
+  /*
+  */
+  start = startMessage(log, "Writing results");
+  for (Word word: readFiles(read1, read2, umi, length)) {
+    if (!word.filtered) {
+      Node<4, NLeaf>* node = trie.find(word.data);
+      if (!node->leaf->cluster->visited) {
+        // Emit reads.
+        log << node->leaf->cluster->id << '\n';
+        node->leaf->cluster->visited = true;
+      }
+    }
+  }
+  endMessage(log, start);
 
   log
-    << "\nRead " << line << " lines of length " << length << ".\n"
+    << "\nRead " << line << " out of " << total << " lines of length "
+      << length << " (" << (float)(total - line) / total << "% discarded).\n"
     << "Left after removing perfect duplicates: " << nonDuplicates << " ("
       << 100 * (float)nonDuplicates / line << "%).\n"
     << "Left after removing nonperfect duplicates (distance " << distance
-      << "): " << cluster - 1 << " ("
-      << 100 * (float)(cluster - 1) / line << "%).\n";
+      << "): " << id << " (" << 100 * (float)(id) / line << "%).\n";
 
   log.close();
 }
