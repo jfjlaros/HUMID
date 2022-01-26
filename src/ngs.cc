@@ -9,68 +9,93 @@ using std::map;
 
 map<char, uint8_t> nuc = {{'A', 0}, {'C', 1}, {'G', 2}, {'T', 3}};
 
+/*
+ * Read vector.
+ */
+struct _ReadVector {
+  vector<Read*> reads;
+  bool eof = false;
 
-vector<Read> read(vector<FastqReader*>& readers) {
-  vector<Read> reads;
-  for (FastqReader* reader: readers) {
-    reads.push_back(*reader->read());
+  void free(void);
+};
+
+
+void _ReadVector::free(void) {
+  for (Read* read: reads) {
+    delete read;
   }
-  return reads;
 }
 
-/*!
- * Read a word from multiple files.
+
+/*
+ * Read one FastQ record from multiple files.
  *
  * \param readers FastQ readers.
- * \param size Word length.
  *
- * \return Word.
+ * \return FastQ records plus EOF status.
  */
-Word read(vector<FastqReader*>& readers, size_t length) {
-  Word result;
+_ReadVector _readFastq(vector<FastqReader*>& readers) {
+  _ReadVector readVector;
   for (FastqReader* reader: readers) {
     Read* read = reader->read();
     if (!read) {
-      result.data.clear();
-      return result;
+      readVector.eof = true;
     }
-    for (size_t i = 0; i < length; i++) {
-      char nucleotide = (*read->mSeq)[i];
-      if (nuc.contains(nucleotide)) {
-        result.data.push_back(nuc[nucleotide]);
-      }
-      else {
-        result.data.push_back(nuc['G']);
-        result.filtered = true;
-      }
-    }
-    delete read;
+    readVector.reads.push_back(read);
   }
-  return result;
+  return readVector;
 }
 
 /*!
- * Read all words from multiple files.
+ * Loop over all reads in multiple FastQ files.
  *
- * \param read1 File name for read 1.
- * \param read2 File name for read 2.
- * \param umi File name for the UMI.
- * \param size Word length.
+ * \param files FastQ file names.
  *
- * \return All words.
+ * \return All reads.
  */
-generator<Word> readFiles(
-    string read1, string read2, string umi, size_t length) {
-  FastqReader read1Reader(read1.c_str());
-  FastqReader read2Reader(read2.c_str());
-  FastqReader umiReader(umi.c_str());
-  vector<FastqReader*> readers = {&read1Reader, &read2Reader, &umiReader};
-
-  Word result = read(readers, length);
-  while (result.data.size()) {
-    co_yield result;
-    result = read(readers, length);
+generator<vector<Read*>> readFiles(vector<string>& files) {
+  vector<FastqReader*> readers;
+  for (string file: files) {
+    FastqReader* reader = new FastqReader(file.c_str());
+    readers.push_back(reader);
   }
+
+  _ReadVector readVector = _readFastq(readers);
+  while (!readVector.eof) {
+    co_yield readVector.reads;
+    readVector.free();
+    readVector = _readFastq(readers);
+  }
+  // TODO: Extra readVector.free() here when files are not of equal length?
+
+  for (FastqReader* reader: readers) {
+    delete reader;
+  }
+}
+
+/*!
+ * Select `length` nucleotides from every read in `reads` to create a word.
+ *
+ * \param reads Reads.
+ * \param length Read selection length.
+ *
+ * \return Word.
+ */
+Word makeWord(vector<Read*>& reads, size_t length) {
+  Word word;
+  for (Read* read: reads) {
+    for (size_t i = 0; i < length; i++) {
+      char nucleotide = (*read->mSeq)[i];
+      if (nuc.contains(nucleotide)) {
+        word.data.push_back(nuc[nucleotide]);
+      }
+      else {
+        word.data.push_back(nuc['G']);
+        word.filtered = true;
+      }
+    }
+  }
+  return word;
 }
 
 /*!

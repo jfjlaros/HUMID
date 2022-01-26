@@ -9,6 +9,9 @@ using std::ios;
 using std::ofstream;
 using std::string;
 
+/*!
+ * Cluster structure.
+ */
 struct Cluster {
   size_t id;
   bool visited = false;
@@ -23,8 +26,6 @@ struct NLeaf : Leaf {
   vector<size_t> lines;
   vector<NLeaf*> neighbours;
   Cluster* cluster = NULL;
-
-  ~NLeaf(void) { if (cluster) { delete cluster; } };
 };
 
 
@@ -84,13 +85,15 @@ void endMessage(ofstream& log, time_t start) {
 void dedup(
     string read1, string read2, string umi, size_t length, size_t distance,
     string outputName, string logName) {
+  vector<string> files = {read1, read2, umi};
   Trie<4, NLeaf> trie;
 
   ofstream log(logName.c_str(), ios::out | ios::binary);
   time_t start = startMessage(log, "Reading data");
   size_t total = 0;
   size_t line = 0;
-  for (Word word: readFiles(read1, read2, umi, length)) {
+  for (vector<Read*> reads: readFiles(files)) {
+    Word word = makeWord(reads, length);
     if (!word.filtered) {
       NLeaf* leaf = trie.add(word.data);
       leaf->lines.push_back(line++);
@@ -114,31 +117,20 @@ void dedup(
   endMessage(log, start);
 
   start = startMessage(log, "Calculating clusters");
+  vector<Cluster*> clusters;
   size_t id = 0;
   for (Result<NLeaf> result: trie.walk()) {
     if (!result.leaf->cluster) {
       Cluster* cluster = new Cluster(id++);
       assignCluster(result.leaf, cluster);
+      clusters.push_back(cluster);
     }
   }
   endMessage(log, start);
 
-/*
   start = startMessage(log, "Writing results");
-  ofstream output(outputName.c_str(), ios::out | ios::binary);
-  for (Result<NLeaf> result: trie.walk()) {
-    for (size_t line: result.leaf->lines) {
-      output << line << ' ' << result.leaf->cluster->id << '\n';
-    }
-  }
-  output.close();
-  endMessage(log, start);
-  */
-
-  /*
-  */
-  start = startMessage(log, "Writing results");
-  for (Word word: readFiles(read1, read2, umi, length)) {
+  for (vector<Read*> reads: readFiles(files)) {
+    Word word = makeWord(reads, length);
     if (!word.filtered) {
       Node<4, NLeaf>* node = trie.find(word.data);
       if (!node->leaf->cluster->visited) {
@@ -150,6 +142,10 @@ void dedup(
   }
   endMessage(log, start);
 
+  for (Cluster* cluster: clusters) {
+    delete cluster;
+  }
+
   log
     << "\nRead " << line << " out of " << total << " lines of length "
       << length << " (" << (float)(total - line) / total << "% discarded).\n"
@@ -159,6 +155,7 @@ void dedup(
       << "): " << id << " (" << 100 * (float)(id) / line << "%).\n";
 
   log.close();
+
 }
 
 
