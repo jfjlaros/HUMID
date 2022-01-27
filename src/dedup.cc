@@ -79,12 +79,12 @@ void endMessage(ofstream& log, time_t start) {
  * \param umi FastQ file for the UMI.
  * \param length Read length.
  * \param distance Maximum hamming distance between reads.
- * \param outputName Output file.
  * \param logName Log file.
  */
 void dedup(
-    string read1, string read2, string umi, size_t length, size_t distance,
-    string outputName, string logName) {
+    string read1, string read2, string umi, size_t length,
+    string r1, string r2, string u,
+    size_t distance, string logName) {
   vector<string> files = {read1, read2, umi};
   Trie<4, NLeaf> trie;
 
@@ -129,17 +129,25 @@ void dedup(
   endMessage(log, start);
 
   start = startMessage(log, "Writing results");
+  ofstream r1Out(r1.c_str(), ios::out | ios::binary);
+  ofstream r2Out(r2.c_str(), ios::out | ios::binary);
+  ofstream uOut(u.c_str(), ios::out | ios::binary);
   for (vector<Read*> reads: readFiles(files)) {
     Word word = makeWord(reads, length);
     if (!word.filtered) {
       Node<4, NLeaf>* node = trie.find(word.data);
       if (!node->leaf->cluster->visited) {
         // Emit reads.
-        log << node->leaf->cluster->id << '\n';
+        reads[0]->printFile(r1Out);
+        reads[1]->printFile(r2Out);
+        reads[2]->printFile(uOut);
         node->leaf->cluster->visited = true;
       }
     }
   }
+  r1Out.close();
+  r2Out.close();
+  uOut.close();
   endMessage(log, start);
 
   for (Cluster* cluster: clusters) {
@@ -172,8 +180,10 @@ int main(int argc, char* argv[]) {
       param("read2", "FastQ file for read 2"),
       param("umi", "FastQ file for the UMI"),
       param("length", "word length"),
+      param("r1", "FastQ file for read 1"),
+      param("r2", "FastQ file for read 2"),
+      param("u", "FastQ file for the UMI"),
       param("-d", 1, "distance"),
-      param("-o", "/dev/stdout", "output file name"),
       param("-l", "/dev/stderr", "log file name"));
 
   return 0;
