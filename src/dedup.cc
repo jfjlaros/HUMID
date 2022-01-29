@@ -1,9 +1,10 @@
 #include <string>
 
 #include "../lib/commandIO/src/commandIO.h"
+#include "../lib/fastp/src/writer.h"
+#include "../lib/trie/src/trie.tcc"
 
-#include "../../src/trie.tcc"
-#include "../lib/ngs/ngs.h"
+#include "ngs.h"
 
 using std::ios;
 using std::ofstream;
@@ -72,20 +73,32 @@ void endMessage(ofstream& log, time_t start) {
 }
 
 /*!
+ */
+string makeFileName(string& name) {
+  size_t pos = name.rfind('.');
+  return name.substr(0, pos) + "_dedup" + name.substr(pos, string::npos);
+}
+
+/*!
+ */
+vector<string> makeFileNames(vector<string>& files) {
+  vector<string> fileNames;
+  for (string name: files) {
+    fileNames.push_back(makeFileName(name));
+  }
+  return fileNames;
+}
+
+/*!
  * Determine duplicates.
  *
- * \param read1 FastQ file for read 1.
- * \param read2 FastQ file for read 2.
- * \param umi FastQ file for the UMI.
  * \param length Read length.
  * \param distance Maximum hamming distance between reads.
  * \param logName Log file.
+ * \param files FastQ files.
  */
 void dedup(
-    string read1, string read2, string umi, size_t length,
-    string r1, string r2, string u,
-    size_t distance, string logName) {
-  vector<string> files = {read1, read2, umi};
+    size_t length, size_t distance, string logName, vector<string> files) {
   Trie<4, NLeaf> trie;
 
   ofstream log(logName.c_str(), ios::out | ios::binary);
@@ -129,25 +142,27 @@ void dedup(
   endMessage(log, start);
 
   start = startMessage(log, "Writing results");
-  ofstream r1Out(r1.c_str(), ios::out | ios::binary);
-  ofstream r2Out(r2.c_str(), ios::out | ios::binary);
-  ofstream uOut(u.c_str(), ios::out | ios::binary);
+  vector<Writer*> outFiles;
+  Options options;
+  for (string name: makeFileNames(files)) {
+    outFiles.push_back(new Writer(&options, name, options.compression));
+  }
   for (vector<Read*> reads: readFiles(files)) {
     Word word = makeWord(reads, length);
     if (!word.filtered) {
       Node<4, NLeaf>* node = trie.find(word.data);
       if (!node->leaf->cluster->visited) {
-        // Emit reads.
-        reads[0]->printFile(r1Out);
-        reads[1]->printFile(r2Out);
-        reads[2]->printFile(uOut);
+        for (size_t i = 0; i < reads.size(); i++) {
+          string s = reads[i]->toString();
+          outFiles[i]->write(s.c_str(), s.size());
+        }
         node->leaf->cluster->visited = true;
       }
     }
   }
-  r1Out.close();
-  r2Out.close();
-  uOut.close();
+  for (Writer* w: outFiles) {
+    delete w;
+  }
   endMessage(log, start);
 
   for (Cluster* cluster: clusters) {
@@ -163,7 +178,6 @@ void dedup(
       << "): " << id << " (" << 100 * (float)(id) / line << "%).\n";
 
   log.close();
-
 }
 
 
@@ -176,15 +190,10 @@ int main(int argc, char* argv[]) {
   interface(
     io,
     dedup, argv[0], "Deduplicate a dataset.", 
-      param("read1", "FastQ file for read 1"),
-      param("read2", "FastQ file for read 2"),
-      param("umi", "FastQ file for the UMI"),
-      param("length", "word length"),
-      param("r1", "FastQ file for read 1"),
-      param("r2", "FastQ file for read 2"),
-      param("u", "FastQ file for the UMI"),
+      param("-l", 8, "word length"),
       param("-d", 1, "distance"),
-      param("-l", "/dev/stderr", "log file name"));
+      param("-o", "/dev/stderr", "log file name"),
+      param("files", "FastQ files"));
 
   return 0;
 }

@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "../../../src/CPP20Coroutines/include/generator.hpp"
-#include "../fastp/src/fastqreader.h"
+#include "../lib/trie/lib/CPP20Coroutines/include/generator.hpp"
+#include "../lib/fastp/src/fastqreader.h"
 
 using std::vector;
 

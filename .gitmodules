@@ -1,0 +1,12 @@
+[submodule "lib/commandIO"]
+	path = lib/commandIO
+	url = https://github.com/jfjlaros/commandIO
+[submodule "lib/fastp"]
+	path = lib/fastp
+	url = https://github.com/OpenGene/fastp
+[submodule "lib/isa-l"]
+	path = lib/isa-l
+	url = https://github.com/intel/isa-l
+[submodule "lib/trie"]
+	path = lib/trie
+	url = https://github.com/jfjlaros/trie
