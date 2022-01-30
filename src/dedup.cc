@@ -1,5 +1,7 @@
 #include <string>
 
+#include <libgen.h>
+
 #include "../lib/commandIO/src/commandIO.h"
 #include "../lib/fastp/src/writer.h"
 #include "../lib/trie/src/trie.tcc"
@@ -74,17 +76,19 @@ void endMessage(ofstream& log, time_t start) {
 
 /*!
  */
-string makeFileName(string& name) {
-  size_t pos = name.rfind('.');
-  return name.substr(0, pos) + "_dedup" + name.substr(pos, string::npos);
+string makeFileName(string& filename, string dir) {
+  string name = basename((char*)filename.c_str());
+  size_t pos = name.find('.');
+  return dir + '/' +
+    name.substr(0, pos) + "_dedup" + name.substr(pos, string::npos);
 }
 
 /*!
  */
-vector<string> makeFileNames(vector<string>& files) {
+vector<string> makeFileNames(vector<string>& files, string dir) {
   vector<string> fileNames;
   for (string name: files) {
-    fileNames.push_back(makeFileName(name));
+    fileNames.push_back(makeFileName(name, dir));
   }
   return fileNames;
 }
@@ -95,10 +99,12 @@ vector<string> makeFileNames(vector<string>& files) {
  * \param length Read length.
  * \param distance Maximum hamming distance between reads.
  * \param logName Log file.
+ * \param dirName Output directory.
  * \param files FastQ files.
  */
 void dedup(
-    size_t length, size_t distance, string logName, vector<string> files) {
+    size_t length, size_t distance, string logName, string dirName,
+    vector<string> files) {
   Trie<4, NLeaf> trie;
 
   ofstream log(logName.c_str(), ios::out | ios::binary);
@@ -144,7 +150,7 @@ void dedup(
   start = startMessage(log, "Writing results");
   vector<Writer*> outFiles;
   Options options;
-  for (string name: makeFileNames(files)) {
+  for (string name: makeFileNames(files, dirName)) {
     outFiles.push_back(new Writer(&options, name, options.compression));
   }
   for (vector<Read*> reads: readFiles(files)) {
@@ -193,6 +199,7 @@ int main(int argc, char* argv[]) {
       param("-l", 8, "word length"),
       param("-d", 1, "distance"),
       param("-o", "/dev/stderr", "log file name"),
+      param("-f", ".", "output directory"),
       param("files", "FastQ files"));
 
   return 0;
