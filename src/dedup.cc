@@ -96,16 +96,17 @@ vector<string> makeFileNames(vector<string>& files, string dir) {
 /*!
  * Determine duplicates.
  *
- * \param length Read length.
+ * \param wordLength Read length.
  * \param distance Maximum hamming distance between reads.
  * \param logName Log file.
  * \param dirName Output directory.
  * \param files FastQ files.
  */
 void dedup(
-    size_t length, size_t distance, string logName, string dirName,
+    size_t wordLength, size_t distance, string logName, string dirName,
     vector<string> files) {
   Trie<4, NLeaf> trie;
+  size_t length = wordLength / files.size();
 
   ofstream log(logName.c_str(), ios::out | ios::binary);
   time_t start = startMessage(log, "Reading data");
@@ -196,7 +197,7 @@ int main(int argc, char* argv[]) {
   interface(
     io,
     dedup, argv[0], "Deduplicate a dataset.", 
-      param("-l", 8, "word length"),
+      param("-l", 24, "word length"),
       param("-d", 1, "distance"),
       param("-o", "/dev/stderr", "log file name"),
       param("-f", ".", "output directory"),
