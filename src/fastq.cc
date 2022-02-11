@@ -1,7 +1,7 @@
 #include <iostream>
 #include <map>
 
-#include "ngs.h"
+#include "fastq.h"
 
 using std::cout;
 using std::ios;
@@ -53,7 +53,7 @@ _ReadVector _readFastq(vector<FastqReader*>& readers) {
  *
  * \return All reads.
  */
-generator<vector<Read*>> readFiles(vector<string>& files) {
+generator<vector<Read*>> readFiles(vector<string> files) {
   vector<FastqReader*> readers;
   for (string file: files) {
     FastqReader* reader = new FastqReader(file.c_str());
@@ -108,4 +108,29 @@ void printWord(vector<uint8_t>& word) {
     cout << ' ' << (int)letter;
   }
   cout << '\n';
+}
+
+/*!
+ */
+string addDir(char const filename[], string dir) {
+  return dir + '/' + filename;
+}
+
+/*!
+ */
+string makeFileName(string filename, string dir) {
+  string name = basename(filename.c_str());
+  size_t pos = name.find('.');
+  string suff = name.substr(0, pos) + "_dedup" + name.substr(pos, string::npos);
+  return addDir(suff.c_str(), dir);
+}
+
+/*!
+ */
+vector<string> makeFileNames(vector<string> files, string dir) {
+  vector<string> fileNames;
+  for (string name: files) {
+    fileNames.push_back(makeFileName(name, dir));
+  }
+  return fileNames;
 }
