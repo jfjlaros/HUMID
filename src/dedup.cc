@@ -13,31 +13,46 @@
 using std::ios;
 
 /*!
+ * Populate a trie with words extracted from FastQ files.
+ *
+ * \param trie Trie.
+ * \param files Input file names.
+ * \param length Word length.
+ * \param log Log handle.
+ *
+ * \return Total and usable number of reads.
  */
 tuple<size_t, size_t> readData(
     Trie<4, NLeaf>& trie, vector<string> files, size_t length,
     ofstream& log) {
   time_t start = startMessage(log, "Reading data");
   size_t total = 0;
-  size_t line = 0;
+  size_t usable = 0;
   for (vector<Read*> reads: readFiles(files)) {
     Word word = makeWord(reads, length);
     if (!word.filtered) {
       NLeaf* leaf = trie.add(word.data);
-      leaf->lines.push_back(line++);
+      usable++;
     }
     total++;
   }
   endMessage(log, start);
 
-  return tuple<size_t, size_t>(total, line);
+  return tuple<size_t, size_t>(total, usable);
 }
 
 /*!
+ * Calculate neighbours for every word in a trie.
+ *
+ * \param trie Trie.
+ * \param distance Maximum neighbour distance.
+ * \param log Log handle.
+ *
+ * \return Number of unique words.
  */
 size_t findNeighbours(Trie<4, NLeaf>& trie, size_t distance, ofstream& log) {
   size_t start = startMessage(log, "Calculating neighbours");
-  size_t nonDuplicates = 0;
+  size_t unique = 0;
   for (Result<NLeaf> walkResult: trie.walk()) {
     for (Result<NLeaf> hammingResult: trie.hamming(
         walkResult.path, distance)) {
@@ -46,14 +61,20 @@ size_t findNeighbours(Trie<4, NLeaf>& trie, size_t distance, ofstream& log) {
         hammingResult.leaf->neighbours.push_back(walkResult.leaf);
       }
     }
-    nonDuplicates++;
+    unique++;
   }
   endMessage(log, start);
 
-  return nonDuplicates;
+  return unique;
 }
 
 /*!
+ * Group neighbours into clusters.
+ *
+ * \param trie Trie.
+ * \param log Log handle.
+ *
+ * \return Number of clusters.
  */
 vector<Cluster*> findClusters(Trie<4, NLeaf>& trie, ofstream& log) {
   size_t start = startMessage(log, "Calculating clusters");
@@ -72,16 +93,25 @@ vector<Cluster*> findClusters(Trie<4, NLeaf>& trie, ofstream& log) {
 }
 
 /*!
+ * Filter FastQ files for duplicates.
+ *
+ * \param trie Trie.
+ * \param files Input file names.
+ * \param length Word length.
+ * \param dirName Output directory.
+ * \param log Log handle.
  */
-void writeResults(
+void writeFiltered(
     Trie<4, NLeaf>& trie, vector<string> files, size_t length,
     string dirName, ofstream& log) {
-  size_t start = startMessage(log, "Writing results");
+  size_t start = startMessage(log, "Writing filtered results");
+
   vector<Writer*> outFiles;
   Options options;
-  for (string name: makeFileNames(files, dirName)) {
+  for (string name: makeFileNames(files, dirName, "dedup")) {
     outFiles.push_back(new Writer(&options, name, options.compression));
   }
+
   for (vector<Read*> reads: readFiles(files)) {
     Word word = makeWord(reads, length);
     if (!word.filtered) {
@@ -97,13 +127,61 @@ void writeResults(
       }
     }
   }
+
   for (Writer* w: outFiles) {
     delete w;
   }
+
   endMessage(log, start);
 }
 
 /*!
+ * Annotate FastQ files with cluster IDs.
+ *
+ * \param trie Trie.
+ * \param files Input file names.
+ * \param length Word length.
+ * \param dirName Output directory.
+ * \param log Log handle.
+ */
+void writeAnnotated(
+    Trie<4, NLeaf>& trie, vector<string> files, size_t length,
+    string dirName, ofstream& log) {
+  size_t start = startMessage(log, "Writing annotated results");
+
+  vector<Writer*> outFiles;
+  Options options;
+  for (string name: makeFileNames(files, dirName, "annotated")) {
+    outFiles.push_back(new Writer(&options, name, options.compression));
+  }
+
+  for (vector<Read*> reads: readFiles(files)) {
+    Word word = makeWord(reads, length);
+    if (!word.filtered) {
+      Node<4, NLeaf>* node = trie.find(word.data);
+
+      for (size_t i = 0; i < reads.size(); i++) {
+        *reads[i]->mName += ':' + to_string(node->leaf->cluster->id);
+        string s = reads[i]->toString();
+        outFiles[i]->write(s.c_str(), s.size());
+      }
+    }
+  }
+
+  for (Writer* w: outFiles) {
+    delete w;
+  }
+
+  endMessage(log, start);
+}
+
+/*!
+ * Make histograms of the number of perfect and nonperfect duplicates.
+ *
+ * \param trie Trie.
+ * \param log Log handle.
+ *
+ * \return Duplicate statistics histograms.
  */
 tuple<map<size_t, size_t>, map<size_t, size_t>> runStatistics(
     Trie<4, NLeaf>& trie, ofstream& log) {
@@ -122,10 +200,20 @@ tuple<map<size_t, size_t>, map<size_t, size_t>> runStatistics(
 }
 
 /*!
+ * Write statistics to files.
+ *
+ * \param counts Perfect duplicate histogram.
+ * \param neighbours Nonperfect duplicate histogram.
+ * \param clusters 
+ * \param total 
+ * \param usable 
+ * \param unique 
+ * \param clusterSize 
+ * \param dirName Output directory.
  */
 void writeStatistics(
     map<size_t, size_t> counts, map<size_t, size_t> neighbours,
-    map<size_t, size_t> clusters, size_t total, size_t useable, size_t unique,
+    map<size_t, size_t> clusters, size_t total, size_t usable, size_t unique,
     size_t clusterSize, string dirName) {
   ofstream output(addDir("counts.dat", dirName), ios::out | ios::binary);
   for (pair<size_t, size_t> count: counts) {
@@ -147,7 +235,7 @@ void writeStatistics(
 
   output.open(addDir("stats.dat", dirName), ios::out | ios::binary);
   output << "total: " << total << '\n';
-  output << "useable: " << useable << '\n';
+  output << "usable: " << usable << '\n';
   output << "unique: " << unique << '\n';
   output << "clusters: " << clusterSize << '\n';
   output.close();
@@ -160,22 +248,27 @@ void writeStatistics(
  * \param distance Maximum hamming distance between reads.
  * \param logName Log file.
  * \param dirName Output directory.
+ * \param runStats
+ * \param write
  * \param files FastQ files.
  */
 void dedup(
     size_t wordLength, size_t distance, string logName, string dirName,
-    bool runStats, bool write, vector<string> files) {
+    bool runStats, bool filter, bool annotate, vector<string> files) {
   Trie<4, NLeaf> trie;
   size_t length = wordLength / files.size();
 
   ofstream log(logName.c_str(), ios::out | ios::binary);
 
   tuple<size_t, size_t> input = readData(trie, files, length, log);
-  size_t nonDuplicates = findNeighbours(trie, distance, log);
+  size_t unique = findNeighbours(trie, distance, log);
   vector<Cluster*> clusters = findClusters(trie, log);
 
-  if (write) {
-    writeResults(trie, files, length, dirName, log);
+  if (filter) {
+    writeFiltered(trie, files, length, dirName, log);
+  }
+  if (annotate) {
+    writeAnnotated(trie, files, length, dirName, log);
   }
   if (runStats) {
     tuple<map<size_t, size_t>, map<size_t, size_t>> stats = runStatistics(
@@ -183,7 +276,7 @@ void dedup(
     map<size_t, size_t> cStats = clusterStats(clusters);
     writeStatistics(
       get<0>(stats), get<1>(stats), cStats, get<0>(input), get<1>(input),
-      nonDuplicates, clusters.size(), dirName);
+      unique, clusters.size(), dirName);
   }
 
   log.close();
@@ -201,12 +294,13 @@ int main(int argc, char* argv[]) {
   interface(
     io,
     dedup, argv[0], "Deduplicate a dataset.", 
-      param("-l", 24, "word length"),
-      param("-d", 1, "distance"),
-      param("-o", "/dev/stderr", "log file name"),
-      param("-f", ".", "output directory"),
-      param("-s", false, "run statistics"),
-      param("-w", true, "do not write output"),
+      param("-n", 24, "word length"),
+      param("-m", 1, "allowed mismatches"),
+      param("-l", "/dev/stderr", "log file name"),
+      param("-d", ".", "output directory"),
+      param("-s", false, "calculate statistics"),
+      param("-q", true, "write deduplicated FastQ files"),
+      param("-a", false, "write annotated FastQ files"),
       param("files", "FastQ files"));
 
   return 0;

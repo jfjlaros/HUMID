@@ -3,6 +3,7 @@
 
 
 /*!
+ * Constructor.
  */
 Cluster::Cluster(size_t id) {
   this->id = id;
@@ -30,6 +31,11 @@ void assignCluster(NLeaf* leaf, Cluster* cluster) {
 }
 
 /*!
+ * Make a histogram of cluster sizes.
+ *
+ * \param clusters List of clusters.
+ *
+ * \return Histogram of cluster sizes.
  */
 map<size_t, size_t> clusterStats(vector<Cluster*>& clusters) {
   map<size_t, size_t> counts;
@@ -40,10 +46,12 @@ map<size_t, size_t> clusterStats(vector<Cluster*>& clusters) {
 }
 
 /*!
+ * Destroy a list of clusters.
+ *
+ * \param clusters List of clusters.
  */
 void freeClusters(vector<Cluster*>& clusters) {
   for (Cluster* cluster: clusters) {
     delete cluster;
   }
 }
-

@@ -16,11 +16,14 @@ struct _ReadVector {
   vector<Read*> reads;
   bool eof = false;
 
-  void free(void);
+  void free();
 };
 
 
-void _ReadVector::free(void) {
+/*
+ * Destroy a ReadVector.
+ */
+void _ReadVector::free() {
   for (Read* read: reads) {
     delete read;
   }
@@ -118,19 +121,20 @@ string addDir(char const filename[], string dir) {
 
 /*!
  */
-string makeFileName(string filename, string dir) {
+string makeFileName(string filename, string dir, string suffix) {
   string name = basename(filename.c_str());
   size_t pos = name.find('.');
-  string suff = name.substr(0, pos) + "_dedup" + name.substr(pos, string::npos);
+  string suff =
+    name.substr(0, pos) + '_' + suffix + name.substr(pos, string::npos);
   return addDir(suff.c_str(), dir);
 }
 
 /*!
  */
-vector<string> makeFileNames(vector<string> files, string dir) {
+vector<string> makeFileNames(vector<string> files, string dir, string suffix) {
   vector<string> fileNames;
   for (string name: files) {
-    fileNames.push_back(makeFileName(name, dir));
+    fileNames.push_back(makeFileName(name, dir, suffix));
   }
   return fileNames;
 }
