@@ -24,8 +24,8 @@ Static compilation
 ::
 
     cd lib/isa-l
-    ./autogen
+    ./autogen.sh
     ./configure
     make
-    cd ../src
+    cd ../../src
     make static
