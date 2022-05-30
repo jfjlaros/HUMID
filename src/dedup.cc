@@ -83,7 +83,7 @@ vector<Cluster*> findClusters(Trie<4, NLeaf>& trie, ofstream& log) {
   for (Result<NLeaf> result: trie.walk()) {
     if (!result.leaf->cluster) {
       Cluster* cluster = new Cluster(id++);
-      assignCluster(result.leaf, cluster);
+      assignMaxCluster(result.leaf, cluster);
       clusters.push_back(cluster);
     }
   }
