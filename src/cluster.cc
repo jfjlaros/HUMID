@@ -41,6 +41,17 @@ void assignMaxCluster(NLeaf* leaf, Cluster* cluster) {
 }
 
 /*!
+ * Determine if the count difference between leaf and neighbour is indicative
+ * of an error that has been amplified by PCR
+ *
+ * \param leaf Leaf node.
+ * \param neighbour Leaf node.
+ */
+bool _pcr_step_size(NLeaf* leaf, NLeaf* neighbour) {
+    return leaf->count > 2 * neighbour->count - 1;
+}
+
+/*!
  * Traverse neighbours to assign cluster IDs, using the directional method
  * Only add neighbours that have at least 2x more reads
  *
@@ -51,11 +62,12 @@ void _assignDirectionalClusterUp(NLeaf* leaf, Cluster* cluster){
   _assignLeaf(leaf, cluster);
 
   for (NLeaf* neighbour: leaf->neighbours) {
-    if (!neighbour->cluster)
+    if (!neighbour->cluster) {
       // If the neighbour has more than 2x the number of reads, the neighbour
       // is the 'true' sequence
-      if (neighbour->count + 1 > 2 * leaf->count)
+      if (_pcr_step_size(neighbour, leaf))
         _assignDirectionalClusterUp(neighbour, cluster);
+    }
   }
 }
 
@@ -70,11 +82,12 @@ void _assignDirectionalClusterDown(NLeaf* leaf, Cluster* cluster){
   _assignLeaf(leaf, cluster);
 
   for (NLeaf* neighbour: leaf->neighbours) {
-    if (!neighbour->cluster)
+    if (!neighbour->cluster) {
       // If the neighbour has more than 2x the number of reads, the neighbour
       // is the 'true' sequence
-      if (neighbour->count * 2 - 1 <= leaf->count)
+      if (_pcr_step_size(leaf, neighbour))
         _assignDirectionalClusterDown(neighbour, cluster);
+    }
   }
 }
 
@@ -84,19 +97,22 @@ void _assignDirectionalClusterDown(NLeaf* leaf, Cluster* cluster){
  * \param leaf Leaf node.
  * \param cluster Cluster.
  */
-void _assignDirectionalCluster(NLeaf* leaf, Cluster* cluster){
+void assignDirectionalCluster(NLeaf* leaf, Cluster* cluster){
   _assignLeaf(leaf, cluster);
 
   for (NLeaf* neighbour: leaf->neighbours) {
-    if (!neighbour->cluster)
+    if (!neighbour->cluster) {
       // If the neighbour has less than half of the number of reads, the
       // neighbour belongs to the current cluster
-      if (neighbour->count * 2 - 1 <= leaf->count)
+      if (_pcr_step_size(leaf, neighbour)) {
         _assignDirectionalClusterDown(neighbour, cluster);
+      }
       // If the neighbour has more than 2x the number of reads, the neighbour
       // is the 'true' sequence
-      if (neighbour->count + 1 > 2 * leaf->count)
+      else if (_pcr_step_size(neighbour, leaf)) {
         _assignDirectionalClusterUp(neighbour, cluster);
+      }
+    }
   }
 }
 

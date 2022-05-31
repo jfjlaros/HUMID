@@ -76,14 +76,25 @@ size_t findNeighbours(Trie<4, NLeaf>& trie, size_t distance, ofstream& log) {
  *
  * \return Number of clusters.
  */
-vector<Cluster*> findClusters(Trie<4, NLeaf>& trie, ofstream& log) {
-  size_t start = startMessage(log, "Calculating clusters");
+vector<Cluster*> findClusters(Trie<4, NLeaf>& trie, bool maximum, ofstream& log) {
+  size_t start{};
+  if (maximum){
+      start = startMessage(log, "Calculating maximum clusters");
+  }
+  else {
+      start = startMessage(log, "Calculating directional clusters");
+  }
   vector<Cluster*> clusters;
   size_t id = 0;
   for (Result<NLeaf> result: trie.walk()) {
     if (!result.leaf->cluster) {
       Cluster* cluster = new Cluster(id++);
-      assignMaxCluster(result.leaf, cluster);
+      if (maximum) {
+        assignMaxCluster(result.leaf, cluster);
+      }
+      else {
+        assignDirectionalCluster(result.leaf, cluster);
+      }
       clusters.push_back(cluster);
     }
   }
@@ -254,7 +265,7 @@ void writeStatistics(
  */
 void dedup(
     size_t wordLength, size_t distance, string logName, string dirName,
-    bool runStats, bool filter, bool annotate, vector<string> files) {
+    bool runStats, bool filter, bool annotate, bool maximum, vector<string> files) {
   Trie<4, NLeaf> trie;
   size_t length = wordLength / files.size();
 
@@ -262,7 +273,7 @@ void dedup(
 
   tuple<size_t, size_t> input = readData(trie, files, length, log);
   size_t unique = findNeighbours(trie, distance, log);
-  vector<Cluster*> clusters = findClusters(trie, log);
+  vector<Cluster*> clusters = findClusters(trie, maximum, log);
 
   if (filter) {
     writeFiltered(trie, files, length, dirName, log);
@@ -301,6 +312,7 @@ int main(int argc, char* argv[]) {
       param("-s", false, "calculate statistics"),
       param("-q", true, "write deduplicated FastQ files"),
       param("-a", false, "write annotated FastQ files"),
+      param("-x", false, "use maximum clustering method"),
       param("files", "FastQ files"));
 
   return 0;
