@@ -68,6 +68,27 @@ bool _at_most_half(int a, int b) {
 }
 
 /*!
+ * Traverse neigbhours until a local maximum is reached
+ *
+ * \param leaf Leaf node.
+ */
+
+NLeaf * _max_neighbour(NLeaf* leaf){
+    bool done = false;
+    while (!done) {
+        // Assume we are done, unless we find a double neighbour
+        done = true;
+        for (NLeaf* neighbour: leaf->neighbours) {
+            if (_at_least_double(neighbour->count, leaf->count)) {
+                leaf = neighbour;
+                done = false;
+                break;
+            }
+        }
+    }
+    return leaf;
+}
+/*!
  * Traverse neighbours to assign cluster IDs, using the directional method
  * Only add neighbours that have at least 2x more reads
  *
