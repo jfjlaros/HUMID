@@ -39,8 +39,7 @@ void assignMaxCluster(NLeaf* leaf, Cluster* cluster) {
     }
   }
 }
-
-/*!
+/*
  * Determine if the count difference between leaf and neighbour is indicative
  * of an error that has been amplified by PCR
  *
@@ -49,6 +48,23 @@ void assignMaxCluster(NLeaf* leaf, Cluster* cluster) {
  */
 bool _pcr_step_size(NLeaf* leaf, NLeaf* neighbour) {
     return leaf->count > 2 * neighbour->count - 1;
+}
+
+/*!
+ * Determine if a is at least 2x b. This is used on the the count difference
+ * between a leaf and its neighbour. If this is the case, neighbour will be
+ * treated as a PCR-amplified error of leaf.
+ */
+bool _at_least_double(int a, int b) {
+    return a > 2 * b -1;
+}
+
+/*!
+ * The inverse of _at_least_double, used to determine if the neighbour is the
+ * true sequence, and leaf a PCR error.
+ */
+bool _at_most_half(int a, int b) {
+    return _at_least_double(b, a);
 }
 
 /*!

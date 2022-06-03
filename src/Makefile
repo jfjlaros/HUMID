@@ -7,7 +7,7 @@ LIBS := cluster fastq log ../lib/commandIO/src/error \
   ../lib/fastp/src/fastareader ../lib/fastp/src/options
 
 
-CC := g++
+CC := g++-10
 CC_ARGS := -O2 -fcoroutines -std=c++20
 LD_ARGS := -lisal -ldeflate
 LD_STATIC_ARGS := -L../lib/isa-l/.libs/ -static
