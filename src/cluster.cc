@@ -49,16 +49,6 @@ void assignMaxCluster(NLeaf* leaf, Cluster* cluster) {
     }
   }
 }
-/*
- * Determine if the count difference between leaf and neighbour is indicative
- * of an error that has been amplified by PCR
- *
- * \param leaf Leaf node.
- * \param neighbour Leaf node.
- */
-bool _pcr_step_size(NLeaf* leaf, NLeaf* neighbour) {
-    return leaf->count > 2 * neighbour->count - 1;
-}
 
 /*!
  * Determine if a is at least 2x b. This is used on the the count difference
@@ -97,45 +87,6 @@ NLeaf * max_neighbour(NLeaf* leaf){
         }
     }
     return leaf;
-}
-/*!
- * Traverse neighbours to assign cluster IDs, using the directional method
- * Only add neighbours that have at least 2x more reads
- *
- * \param leaf Leaf node.
- * \param cluster Cluster.
- */
-void _assignDirectionalClusterUp(NLeaf* leaf, Cluster* cluster){
-  _assignLeaf(leaf, cluster);
-
-  for (NLeaf* neighbour: leaf->neighbours) {
-    if (!neighbour->cluster) {
-      // If the neighbour has more than 2x the number of reads, the neighbour
-      // is the 'true' sequence
-      if (_pcr_step_size(neighbour, leaf))
-        _assignDirectionalClusterUp(neighbour, cluster);
-    }
-  }
-}
-
-/*!
- * Traverse neighbours to assign cluster IDs, using the directional method
- * Only add neighbours that have at most 2x fewer reads
- *
- * \param leaf Leaf node.
- * \param cluster Cluster.
- */
-void _assignDirectionalClusterDown(NLeaf* leaf, Cluster* cluster){
-  _assignLeaf(leaf, cluster);
-
-  for (NLeaf* neighbour: leaf->neighbours) {
-    if (!neighbour->cluster) {
-      // If the neighbour has more than 2x the number of reads, the neighbour
-      // is the 'true' sequence
-      if (_pcr_step_size(leaf, neighbour))
-        _assignDirectionalClusterDown(neighbour, cluster);
-    }
-  }
 }
 
 /*!

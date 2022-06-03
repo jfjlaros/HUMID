@@ -1,21 +1,6 @@
 #include <catch.hpp>
 #include "../src/cluster.cc"
 
-TEST_CASE("Test PCR step size") {
-    NLeaf leaf;
-    NLeaf neighbour1;
-    NLeaf neighbour2;
-
-    // Check that NLeaf count is initialised to 0
-    REQUIRE(leaf.count == 0);
-
-    // Set the counts
-    leaf.count = 4;
-    neighbour1.count = 2;
-
-    REQUIRE(_pcr_step_size(&leaf, &neighbour1));
-}
-
 TEST_CASE("Test if a is at least 2x b", "[cluster]"){
     REQUIRE(_at_least_double(1, 0));
     REQUIRE(_at_least_double(2, 1));
@@ -71,7 +56,9 @@ TEST_CASE("Test walking a chain of nodes", "[cluster]"){
     NLeaf last_one;
     last_one.count=7;
     third_neighbour.neighbours.push_back(&last_one);
-    // Should not be the last one, but the third one
+
+    // Check that the last neighbour was not added, since it was not high
+    // enough
     REQUIRE(max_neighbour(&leaf) == &third_neighbour);
 }
 
