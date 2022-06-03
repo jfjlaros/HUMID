@@ -55,16 +55,16 @@ void assignMaxCluster(NLeaf* leaf, Cluster* cluster) {
  * between a leaf and its neighbour. If this is the case, neighbour will be
  * treated as a PCR-amplified error of leaf.
  */
-bool _at_least_double(int a, int b) {
+bool _atLeastDouble(int a, int b) {
     return a > 2 * b -1;
 }
 
 /*!
- * The inverse of _at_least_double, used to determine if the neighbour is the
+ * The inverse of _atLeastDouble, used to determine if the neighbour is the
  * true sequence, and leaf a PCR error.
  */
-bool _at_most_half(int a, int b) {
-    return _at_least_double(b, a);
+bool _atMostHalf(int a, int b) {
+    return _atLeastDouble(b, a);
 }
 
 /*!
@@ -79,7 +79,7 @@ NLeaf * max_neighbour(NLeaf* leaf){
         // Assume we are done, unless we find a double neighbour
         done = true;
         for (NLeaf* neighbour: leaf->neighbours) {
-            if (_at_least_double(neighbour->count, leaf->count)) {
+            if (_atLeastDouble(neighbour->count, leaf->count)) {
                 leaf = neighbour;
                 done = false;
                 break;
@@ -102,7 +102,7 @@ void assignDirectionalCluster(NLeaf* leaf, Cluster* cluster){
   for (NLeaf* neighbour: leaf->neighbours) {
     // If we encounter a neighbour that is unassigned, at most half leaf's
     // size, we recursively add it to cluster
-    if (!neighbour->cluster and _at_most_half(neighbour->count, leaf->count)) {
+    if (!neighbour->cluster and _atMostHalf(neighbour->count, leaf->count)) {
       // If the neighbour has less than half of the number of reads, the
       // neighbour belongs to the current cluster
       assignDirectionalCluster(neighbour, cluster);
