@@ -22,6 +22,7 @@ struct Cluster {
 };
 
 void assignMaxCluster(NLeaf*, Cluster*);
+NLeaf * max_neighbour(NLeaf*);
 void assignDirectionalCluster(NLeaf*, Cluster*);
 map<size_t, size_t> clusterStats(vector<Cluster*>&);
 void freeClusters(vector<Cluster*>&);
