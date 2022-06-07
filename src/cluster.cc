@@ -79,7 +79,8 @@ NLeaf * max_neighbour(NLeaf* leaf){
         // Assume we are done, unless we find a double neighbour
         done = true;
         for (NLeaf* neighbour: leaf->neighbours) {
-            if (_atLeastDouble(neighbour->count, leaf->count)) {
+            // Neighbour count is 2x, and neighbour is not in a cluster yet
+            if (_atLeastDouble(neighbour->count, leaf->count) and !neighbour->cluster) {
                 leaf = neighbour;
                 done = false;
                 break;

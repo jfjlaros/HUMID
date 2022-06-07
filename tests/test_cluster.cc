@@ -30,6 +30,7 @@ TEST_CASE("Test walking node whose neighbour is already assigned", "[cluster]"){
     NLeaf assigned_neighbour;
     Cluster* c = new Cluster(2);
     assigned_neighbour.cluster = c;
+    assigned_neighbour.count = 2;
     leaf.neighbours.push_back(&assigned_neighbour);
     REQUIRE(max_neighbour(&leaf) == &leaf);
 }
