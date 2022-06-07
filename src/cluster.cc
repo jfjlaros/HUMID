@@ -90,24 +90,40 @@ NLeaf * max_neighbour(NLeaf* leaf){
 }
 
 /*!
- * Traverse neighbours to assign cluster IDs, using the directional method
+ * Internal function to traverse neighbours to assign cluster ID
  *
  * \param leaf Leaf node.
  * \param cluster Cluster.
  */
-void assignDirectionalCluster(NLeaf* leaf, Cluster* cluster){
+void _assignDirectionalCluster(NLeaf* leaf, Cluster* cluster) {
+  // Assign the leaf to the cluster
   _assignLeaf(leaf, cluster);
-  _updateMaxCount(leaf, cluster);
-
   for (NLeaf* neighbour: leaf->neighbours) {
     // If we encounter a neighbour that is unassigned, at most half leaf's
     // size, we recursively add it to cluster
     if (!neighbour->cluster and _atMostHalf(neighbour->count, leaf->count)) {
       // If the neighbour has less than half of the number of reads, the
       // neighbour belongs to the current cluster
-      assignDirectionalCluster(neighbour, cluster);
+      _assignDirectionalCluster(neighbour, cluster);
       }
   }
+}
+
+/*!
+ * Traverse neighbours to assign cluster IDs, using the directional method
+ *
+ * Also updates the max_count for the cluster after determining a maximum
+ * neighbour
+ *
+ * \param leaf Leaf node.
+ * \param cluster Cluster.
+ */
+void assignDirectionalCluster(NLeaf* leaf, Cluster* cluster){
+  // Determine a maximum neighbour
+  NLeaf* node = max_neighbour(leaf);
+  // Update the maxcount for the cluster using the max node (only once)
+  _updateMaxCount(node, cluster);
+  _assignDirectionalCluster(node, cluster);
 }
 
 /*!

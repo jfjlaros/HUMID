@@ -94,14 +94,8 @@ TEST_CASE("Test assigning to cluster") {
     // Assume we start with node 1, and want to assign them to cluster 1
     Cluster* cluster1 = new Cluster(1);
 
-    // First, we must find the maximum node reachable from node1
-    NLeaf* node = max_neighbour(&node1);
-
-    // This should be node3
-    REQUIRE(node == &node3);
-
     // Next, we assign all nodes
-    assignDirectionalCluster(node, cluster1);
+    assignDirectionalCluster(&node1, cluster1);
 
     // Then, the first three nodes should be assigned to cluster 1
     REQUIRE(node1.cluster->id == 1);
