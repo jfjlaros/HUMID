@@ -25,7 +25,7 @@ $(EXEC): $(MAIN).cc $(OBJS)
 	$(CC) $(CC_ARGS) -o $@ -c $<
 
 check: all
-	valgrind ./$(EXEC)
+	valgrind --error-exitcode=1 --leak-check=full ./$(EXEC) || ((echo "\033[0;31mVALGRIND ERRORS DETECTED\033[0m" && false))
 
 clean:
 	rm -f $(OBJS)
