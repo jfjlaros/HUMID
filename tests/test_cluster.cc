@@ -1,6 +1,12 @@
 #include <catch.hpp>
 #include "../src/cluster.cc"
 
+// Helper function to link nodes
+void link(NLeaf* a, NLeaf* b){
+    a->neighbours.push_back(b);
+    b->neighbours.push_back(a);
+}
+
 TEST_CASE("Test if a is at least 2x b", "[cluster]"){
     REQUIRE(_atLeastDouble(1, 0));
     REQUIRE(_atLeastDouble(2, 1));
@@ -31,7 +37,7 @@ TEST_CASE("Test walking node whose neighbour is already assigned", "[cluster]"){
     Cluster* c = new Cluster(2);
     assigned_neighbour.cluster = c;
     assigned_neighbour.count = 2;
-    leaf.neighbours.push_back(&assigned_neighbour);
+    link(&leaf, &assigned_neighbour);
     REQUIRE(max_neighbour(&leaf) == &leaf);
 }
 
@@ -44,29 +50,23 @@ TEST_CASE("Test walking a chain of nodes", "[cluster]"){
     NLeaf free_neighbour;
     free_neighbour.count=2;
 
-    leaf.neighbours.push_back(&free_neighbour);
+    link(&leaf, &free_neighbour);
     REQUIRE(max_neighbour(&leaf) == &free_neighbour);
 
     //Lets test a third, further neighbour
     NLeaf third_neighbour;
     third_neighbour.count=4;
-    free_neighbour.neighbours.push_back(&third_neighbour);
+    link(&free_neighbour, &third_neighbour);
     REQUIRE(max_neighbour(&leaf) == &third_neighbour);
 
     //Add one more neighbour, that is not high enough to add
     NLeaf last_one;
     last_one.count=7;
-    third_neighbour.neighbours.push_back(&last_one);
+    link(&third_neighbour, &last_one);
 
     // Check that the last neighbour was not added, since it was not high
     // enough
     REQUIRE(max_neighbour(&leaf) == &third_neighbour);
-}
-
-// Helper function to link nodes
-void link(NLeaf* a, NLeaf* b){
-    a->neighbours.push_back(b);
-    b->neighbours.push_back(a);
 }
 
 TEST_CASE("Test assigning to cluster") {
