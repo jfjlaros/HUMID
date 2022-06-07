@@ -93,8 +93,7 @@ vector<Cluster*> findClusters(Trie<4, NLeaf>& trie, bool maximum, ofstream& log)
         assignMaxCluster(result.leaf, cluster);
       }
       else {
-        NLeaf* node = max_neighbour(result.leaf);
-        assignDirectionalCluster(node, cluster);
+        assignDirectionalCluster(result.leaf, cluster);
       }
       clusters.push_back(cluster);
     }
