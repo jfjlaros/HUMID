@@ -78,11 +78,11 @@ size_t findNeighbours(Trie<4, NLeaf>& trie, size_t distance, ofstream& log) {
  */
 vector<Cluster*> findClusters(Trie<4, NLeaf>& trie, bool maximum, ofstream& log) {
   size_t start{};
-  if (maximum){
-      start = startMessage(log, "Calculating maximum clusters");
+  if (maximum) {
+    start = startMessage(log, "Calculating maximum clusters");
   }
   else {
-      start = startMessage(log, "Calculating directional clusters");
+    start = startMessage(log, "Calculating directional clusters");
   }
   vector<Cluster*> clusters;
   size_t id = 0;
