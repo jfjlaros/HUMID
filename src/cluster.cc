@@ -74,17 +74,17 @@ bool _atMostHalf(int a, int b) {
  */
 
 NLeaf * max_neighbour(NLeaf* leaf){
-    bool done = false;
-    while (!done) {
-        // Assume we are done, unless we find a double neighbour
-        done = true;
-        for (NLeaf* neighbour: leaf->neighbours) {
-            // Neighbour count is 2x, and neighbour is not in a cluster yet
-            if (_atLeastDouble(neighbour->count, leaf->count) and !neighbour->cluster) {
-                leaf = neighbour;
-                done = false;
-                break;
-            }
+    int i = 0;
+    while (i < leaf->neighbours.size()) {
+        NLeaf* neighbour = leaf->neighbours[i];
+        // Go to the neighbour and repeat
+        if (_atLeastDouble(neighbour->count, leaf->count) and !neighbour->cluster) {
+            leaf = neighbour;
+            i = 0;
+        }
+        // Try the next neighbour
+        else {
+            i++;
         }
     }
     return leaf;
