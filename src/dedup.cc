@@ -50,15 +50,44 @@ tuple<size_t, size_t> readData(
  *
  * \return Number of unique words.
  */
-size_t findNeighbours(Trie<4, NLeaf>& trie, size_t distance, ofstream& log) {
+size_t findHammingNeighbours(
+    Trie<4, NLeaf>& trie, size_t distance, ofstream& log) {
   size_t start = startMessage(log, "Calculating neighbours");
   size_t unique = 0;
   for (Result<NLeaf> walkResult: trie.walk()) {
-    for (Result<NLeaf> hammingResult: trie.hamming(
+    for (Result<NLeaf> hammingResult: trie.asymmetricHamming(
         walkResult.path, distance)) {
       if (walkResult.leaf != hammingResult.leaf) {
         walkResult.leaf->neighbours.push_back(hammingResult.leaf);
         hammingResult.leaf->neighbours.push_back(walkResult.leaf);
+      }
+    }
+    unique++;
+  }
+  endMessage(log, start);
+
+  return unique;
+}
+
+/*!
+ * Calculate neighbours for every word in a trie.
+ *
+ * \param trie Trie.
+ * \param distance Maximum neighbour distance.
+ * \param log Log handle.
+ *
+ * \return Number of unique words.
+ */
+size_t findEditNeighbours(
+    Trie<4, NLeaf>& trie, size_t distance, ofstream& log) {
+  size_t start = startMessage(log, "Calculating neighbours");
+  size_t unique = 0;
+  for (Result<NLeaf> walkResult: trie.walk()) {
+    for (Result<NLeaf> editResult: trie.asymmetricLevenshtein(
+        walkResult.path, distance)) {
+      if (walkResult.leaf != editResult.leaf) {
+        walkResult.leaf->neighbours.push_back(editResult.leaf);
+        editResult.leaf->neighbours.push_back(walkResult.leaf);
       }
     }
     unique++;
@@ -256,7 +285,7 @@ void writeStatistics(
  * Determine duplicates.
  *
  * \param wordLength Read length.
- * \param distance Maximum hamming distance between reads.
+ * \param distance Maximum distance between reads.
  * \param logName Log file.
  * \param dirName Output directory.
  * \param runStats
@@ -265,14 +294,23 @@ void writeStatistics(
  */
 void dedup(
     size_t wordLength, size_t distance, string logName, string dirName,
-    bool runStats, bool filter, bool annotate, bool maximum, vector<string> files) {
+    bool runStats, bool filter, bool annotate, bool edit, bool maximum,
+    vector<string> files) {
   Trie<4, NLeaf> trie;
   size_t length = wordLength / files.size();
 
   ofstream log(logName.c_str(), ios::out | ios::binary);
 
   tuple<size_t, size_t> input = readData(trie, files, length, log);
-  size_t unique = findNeighbours(trie, distance, log);
+
+  size_t unique;
+  if (edit) {
+    unique = findEditNeighbours(trie, distance, log);
+  }
+  else {
+    unique = findHammingNeighbours(trie, distance, log);
+  }
+
   vector<Cluster*> clusters = findClusters(trie, maximum, log);
 
   if (filter) {
@@ -313,6 +351,7 @@ int main(int argc, char* argv[]) {
       param("-q", true, "write deduplicated FastQ files"),
       param("-a", false, "write annotated FastQ files"),
       param("-x", false, "use maximum clustering method"),
+      param("-e", false, "use edit distance"),
       param("files", "FastQ files"));
 
   return 0;
