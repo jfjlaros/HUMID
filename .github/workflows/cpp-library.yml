@@ -18,8 +18,7 @@ jobs:
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 10
       - name: Install submodules
         run: |
-          git submodule init
-          git submodule update
+          git submodule update --init --recursive
       - name: Test with catch
         run: |
           cd tests
