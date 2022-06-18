@@ -21,6 +21,7 @@ struct Cluster {
   Cluster(size_t);
 };
 
-void assignCluster(NLeaf*, Cluster*);
+void assignMaxCluster(NLeaf*, Cluster*);
+void assignDirectionalCluster(NLeaf*, Cluster*);
 map<size_t, size_t> clusterStats(vector<Cluster*>&);
 void freeClusters(vector<Cluster*>&);
