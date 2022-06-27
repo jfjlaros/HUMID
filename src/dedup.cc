@@ -1,5 +1,6 @@
 #include <string>
 #include <tuple>
+#include <filesystem>
 
 #include "../lib/commandIO/src/commandIO.h"
 #include "../lib/fastp/src/writer.h"
@@ -313,6 +314,7 @@ void dedup(
 
   vector<Cluster*> clusters = findClusters(trie, maximum, log);
 
+  std::filesystem::create_directories(dirName);
   if (filter) {
     writeFiltered(trie, files, length, dirName, log);
   }
