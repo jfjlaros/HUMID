@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <string>
 #include <tuple>
 
@@ -10,6 +11,7 @@
 #include "leaf.h"
 #include "log.h"
 
+using std::filesystem::create_directories;
 using std::ios;
 
 /*!
@@ -313,6 +315,7 @@ void dedup(
 
   vector<Cluster*> clusters = findClusters(trie, maximum, log);
 
+  create_directories(dirName);
   if (filter) {
     writeFiltered(trie, files, length, dirName, log);
   }
