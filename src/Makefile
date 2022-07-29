@@ -15,7 +15,7 @@ LD_STATIC_ARGS := -L../lib/isa-l/.libs/ -static
 
 OBJS := $(addsuffix .o, $(LIBS))
 
-.PHONY: clean distclean
+.PHONY: clean distclean doc
 
 
 all: $(EXEC)
@@ -32,8 +32,13 @@ $(EXEC): $(MAIN) $(OBJS)
 %.o: %.cpp
 	$(CC) $(CC_ARGS) -o $@ -c $<
 
+../docs/cli.rst: ../docs/cli_template.rst $(EXEC)
+	cp $< $@ && ./$(EXEC) -h >> $@
+
 clean:
 	rm -f $(OBJS)
 
 distclean: clean
 	rm -f $(EXEC) static
+
+doc: ../docs/cli.rst
