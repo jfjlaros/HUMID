@@ -1,14 +1,19 @@
 EXEC := run_tests
 MAIN := test_lib
-TESTS := test_cluster
+TESTS := test_cluster test_fastq
+LIBS := ../src/cluster ../src/fastq \
+  ../lib/fastp/src/fastqreader ../lib/fastp/src/readpool \
+  ../lib/fastp/src/read ../lib/fastp/src/sequence ../lib/fastp/src/writer \
+  ../lib/fastp/src/fastareader ../lib/fastp/src/options
 FIXTURES :=
 
 
 CC := g++
 CC_ARGS := -std=c++20 -fcoroutines -Wno-pmf-conversions
+LD_ARGS := -lisal -ldeflate
 
 
-OBJS := $(addsuffix .o, $(TESTS) $(FIXTURES))
+OBJS := $(addsuffix .o, $(TESTS) $(FIXTURES) $(LIBS))
 
 .PHONY: all check clean distclean
 
@@ -16,7 +21,7 @@ OBJS := $(addsuffix .o, $(TESTS) $(FIXTURES))
 all: $(EXEC)
 
 $(EXEC): $(MAIN).cc $(OBJS)
-	$(CC) $(CC_ARGS) -o $@ $^
+	$(CC) $(CC_ARGS) -o $@ $^ $(LD_ARGS)
 
 %.o: %.cpp
 	$(CC) $(CC_ARGS) -o $@ -c $<

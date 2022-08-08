@@ -1,5 +1,12 @@
 #include <catch.hpp>
-#include "../src/cluster.cc"
+
+#include "../src/cluster.h"
+#include "../src/leaf.h"
+
+bool _atLeastDouble(int, int);
+bool _atMostHalf(int, int);
+NLeaf* max_neighbour(NLeaf*);
+
 
 // Helper function to link nodes
 void link(NLeaf* a, NLeaf* b){
