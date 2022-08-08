@@ -140,10 +140,28 @@ vector<string> makeFileNames(vector<string> files, string dir, string suffix) {
 }
 
 /*!
- * Determine whether header contains a UMI
+ * Determine whether header contains a UMI before the first space
  *
  * \param header FastQ header line
  */
 bool _hasUMI(string header) {
-  return header.find("_") != string::npos;
+  return !_extractUMI(header).empty();
+}
+
+/*!
+ * Extract UMI from a header
+ *
+ * \param header Fastq header line
+ */
+string _extractUMI(string header) {
+  size_t first_space = header.find(" ");
+  size_t umiStart = header.substr(0, first_space).find("_");
+
+  // If there is no underscore in the header
+  if (umiStart == string::npos) {
+    return "";
+  }
+  else {
+    return header.substr(umiStart + 1, first_space - umiStart - 1);
+  }
 }
