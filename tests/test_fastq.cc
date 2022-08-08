@@ -11,6 +11,8 @@ TEST_CASE("Test extracting a UMI from a fastp Read pointer") {
 TEST_CASE("Extract UMI from FastQ header") {
   // Tests for read without UMI in header
   REQUIRE(_extractUMI("@header") == "");
+  REQUIRE(_extractUMI("@header with spaces") == "");
+  REQUIRE(_extractUMI("@header_with_many_underscores and space") == "");
 
   // Tests for reads with UMI in header
   REQUIRE(_extractUMI("@header_AATT") == "AATT");

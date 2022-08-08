@@ -1,13 +1,16 @@
 #include <iostream>
 #include <map>
+#include <unordered_set>
 
 #include "fastq.h"
 
 using std::cout;
 using std::ios;
 using std::map;
+using std::unordered_set;
 
 map<char, uint8_t> nuc = {{'A', 0}, {'C', 1}, {'G', 2}, {'T', 3}};
+unordered_set<char> nnuc = {'A', 'T', 'C', 'G', 'N'};
 
 /*
  * Read vector.
@@ -148,13 +151,25 @@ string _extractUMI(string header) {
   size_t first_space = header.find(" ");
   size_t umiStart = header.substr(0, first_space).find_last_of("_");
 
-  // If there is no underscore in the header
+  // We need to do some sanity checking on the eventual 'UMI' we find.
+  string UMI;
+
+  // If there is no underscore in the header, there is no UMI.
   if (umiStart == string::npos) {
-    return "";
+    UMI="";
   }
+  // Get the string between the last _, and the first space.
   else {
-    return header.substr(umiStart + 1, first_space - umiStart - 1);
+    UMI = header.substr(umiStart + 1, first_space - umiStart - 1);
   }
+  // Check if the UMI only contains ATCGN. If we find any other character,
+  // 'UMI' is not actually a UMI.
+  for (char c: UMI) {
+    if (nnuc.find(c) == nnuc.end()) {
+      return "";
+    }
+  }
+  return UMI;
 }
 
 /*!
