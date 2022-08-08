@@ -44,7 +44,7 @@ _ReadVector _readFastq(vector<FastqReader*>& readers) {
   _ReadVector readVector;
   for (FastqReader* reader: readers) {
     Read* read = reader->read();
-    if (!read) {
+    if (not read) {
       readVector.eof = true;
     }
     readVector.reads.push_back(read);
@@ -67,7 +67,7 @@ generator<vector<Read*>> readFiles(vector<string> files) {
   }
 
   _ReadVector readVector = _readFastq(readers);
-  while (!readVector.eof) {
+  while (not readVector.eof) {
     co_yield readVector.reads;
     readVector.free();
     readVector = _readFastq(readers);
