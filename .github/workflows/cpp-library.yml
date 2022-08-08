@@ -16,15 +16,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          apt update
-          apt install \
+          sudo apt update
+          sudo apt install \
             catch \
             g++-11 \
             libdeflate-dev \
             libisal-dev \
             make \
             valgrind
-          update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 10
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 10
 
       - name: Test with catch
         run: |
