@@ -20,6 +20,11 @@ TEST_CASE("Extract UMI from FastQ header") {
     new string("@header_AATT with extra junk"),
     new string("ATCG")
   );
+  // Read with multiple underscores
+  fakeRead *underscoreHeader = new fakeRead(
+    new string("@header_with_many_underscores_AATT and space"),
+    new string("ATCG")
+  );
 
   // Tests for read without UMI in header
   REQUIRE(_extractUMI(*noUMI->mName) == "");
@@ -30,8 +35,12 @@ TEST_CASE("Extract UMI from FastQ header") {
   REQUIRE(_extractUMI(*hasUMI->mName) == "AATT");
   REQUIRE(_extractUMI(*weirdHeader->mName) == "AATT");
 
+  // Test for read with multiple underscores
+  REQUIRE(_extractUMI(*underscoreHeader->mName) == "AATT");
+
   // Clean up
   delete noUMI;
   delete hasUMI;
   delete weirdHeader;
+  delete underscoreHeader;
 }

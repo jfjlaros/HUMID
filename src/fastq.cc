@@ -155,7 +155,7 @@ bool _hasUMI(string header) {
  */
 string _extractUMI(string header) {
   size_t first_space = header.find(" ");
-  size_t umiStart = header.substr(0, first_space).find("_");
+  size_t umiStart = header.substr(0, first_space).find_last_of("_");
 
   // If there is no underscore in the header
   if (umiStart == string::npos) {
