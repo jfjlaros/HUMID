@@ -25,3 +25,4 @@ string makeFileName(string, string, string);
 vector<string> makeFileNames(vector<string>, string, string);
 bool _hasUMI(string);
 string _extractUMI(string);
+string extractUMI(Read*);

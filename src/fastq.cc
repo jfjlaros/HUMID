@@ -140,15 +140,6 @@ vector<string> makeFileNames(vector<string> files, string dir, string suffix) {
 }
 
 /*!
- * Determine whether header contains a UMI before the first space
- *
- * \param header FastQ header line
- */
-bool _hasUMI(string header) {
-  return !_extractUMI(header).empty();
-}
-
-/*!
  * Extract UMI from a header
  *
  * \param header Fastq header line
@@ -164,4 +155,13 @@ string _extractUMI(string header) {
   else {
     return header.substr(umiStart + 1, first_space - umiStart - 1);
   }
+}
+
+/*!
+ * Extract UMI from a read
+ *
+ * \param read Read
+ */
+string extractUMI(Read* read) {
+  return _extractUMI(*read->mName);
 }
