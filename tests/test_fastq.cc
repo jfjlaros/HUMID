@@ -20,5 +20,6 @@ TEST_CASE("Extract UMI from FastQ header") {
   // Tests for reads with UMI in header
   REQUIRE(_extractUMI("@header_AATT") == "AATT");
   REQUIRE(_extractUMI("@header_AATT with spaces") == "AATT");
+  REQUIRE(_extractUMI("@header_with_many_underscores_AATT") == "AATT");
   REQUIRE(_extractUMI("@header_with_many_underscores_AATT and space") == "AATT");
 }
