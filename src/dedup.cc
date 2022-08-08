@@ -32,7 +32,7 @@ tuple<size_t, size_t> readData(
   size_t usable = 0;
   for (vector<Read*> reads: readFiles(files)) {
     Word word = makeWord(reads, length);
-    if (!word.filtered) {
+    if (not word.filtered) {
       NLeaf* leaf = trie.add(word.data);
       usable++;
     }
@@ -118,7 +118,7 @@ vector<Cluster*> findClusters(Trie<4, NLeaf>& trie, bool maximum, ofstream& log)
   vector<Cluster*> clusters;
   size_t id = 0;
   for (Result<NLeaf> result: trie.walk()) {
-    if (!result.leaf->cluster) {
+    if (not result.leaf->cluster) {
       Cluster* cluster = new Cluster(id++);
       if (maximum) {
         assignMaxCluster(result.leaf, cluster);
@@ -156,7 +156,7 @@ void writeFiltered(
 
   for (vector<Read*> reads: readFiles(files)) {
     Word word = makeWord(reads, length);
-    if (!word.filtered) {
+    if (not word.filtered) {
       Node<4, NLeaf>* node = trie.find(word.data);
       if (
           !node->leaf->cluster->visited &&
@@ -199,7 +199,7 @@ void writeAnnotated(
 
   for (vector<Read*> reads: readFiles(files)) {
     Word word = makeWord(reads, length);
-    if (!word.filtered) {
+    if (not word.filtered) {
       Node<4, NLeaf>* node = trie.find(word.data);
 
       for (size_t i = 0; i < reads.size(); i++) {

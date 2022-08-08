@@ -44,7 +44,7 @@ void assignMaxCluster(NLeaf* leaf, Cluster* cluster) {
   _assignLeaf(leaf, cluster);
   _updateMaxCount(leaf, cluster);
   for (NLeaf* neighbour: leaf->neighbours) {
-    if (!neighbour->cluster) {
+    if (not neighbour->cluster) {
       assignMaxCluster(neighbour, cluster);
     }
   }
@@ -72,7 +72,7 @@ bool _atMostHalf(int a, int b) {
  *
  * \param leaf Leaf node.
  */
-NLeaf* max_neighbour(NLeaf* leaf){
+NLeaf* max_neighbour(NLeaf* leaf) {
   int i = 0;
   while (i < leaf->neighbours.size()) {
     NLeaf* neighbour = leaf->neighbours[i++];
@@ -97,7 +97,7 @@ void _assignDirectionalCluster(NLeaf* leaf, Cluster* cluster) {
   for (NLeaf* neighbour: leaf->neighbours) {
     // If we encounter a neighbour that is unassigned, at most half leaf's
     // size, we recursively add it to cluster.
-    if (!neighbour->cluster and _atMostHalf(neighbour->count, leaf->count)) {
+    if (not neighbour->cluster and _atMostHalf(neighbour->count, leaf->count)) {
       // If the neighbour has less than half of the number of reads, the
       // neighbour belongs to the current cluster.
       _assignDirectionalCluster(neighbour, cluster);
@@ -114,7 +114,7 @@ void _assignDirectionalCluster(NLeaf* leaf, Cluster* cluster) {
  * \param leaf Leaf node.
  * \param cluster Cluster.
  */
-void assignDirectionalCluster(NLeaf* leaf, Cluster* cluster){
+void assignDirectionalCluster(NLeaf* leaf, Cluster* cluster) {
   NLeaf* node = max_neighbour(leaf);
   // Update the maxcount for the cluster using the max node (only once)
   _updateMaxCount(node, cluster);
