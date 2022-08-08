@@ -23,6 +23,5 @@ void printWord(vector<uint8_t>&);
 string addDir(char const[], string);
 string makeFileName(string, string, string);
 vector<string> makeFileNames(vector<string>, string, string);
-bool _hasUMI(string);
 string _extractUMI(string);
 string extractUMI(Read*);

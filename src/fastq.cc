@@ -158,12 +158,12 @@ string _extractUMI(string header) {
   if (umiStart == string::npos) {
     UMI="";
   }
-  // Get the string between the last _, and the first space.
+  // Get the string between the last _ and the first space.
   else {
     UMI = header.substr(umiStart + 1, first_space - umiStart - 1);
   }
-  // Check if the UMI only contains ATCGN. If we find any other character,
-  // 'UMI' is not actually a UMI.
+  // Check if the UMI only contains characters from 'ATCGN'. If we find any
+  // other character, the 'UMI' is not actually a UMI.
   for (char c: UMI) {
     if (nnuc.find(c) == nnuc.end()) {
       return "";
