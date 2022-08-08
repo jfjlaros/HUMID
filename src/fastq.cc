@@ -138,3 +138,12 @@ vector<string> makeFileNames(vector<string> files, string dir, string suffix) {
   }
   return fileNames;
 }
+
+/*!
+ * Determine whether header contains a UMI
+ *
+ * \param header FastQ header line
+ */
+bool _hasUMI(string header) {
+  return header.find("_") != string::npos;
+}
