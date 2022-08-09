@@ -32,7 +32,7 @@ TEST_CASE("Test making a Word out of a vector of Reads") {
   reads.push_back(&read2);
   REQUIRE(true);
 
-  Word word = makeWord(reads, 4);
+  Word word = makeWord(reads, 8);
   vector<uint8_t> expected = { 0, 0, 0, 0, 3, 3, 3, 3};
   REQUIRE(word.data == expected);
 }

@@ -139,12 +139,12 @@ vector<Cluster*> findClusters(Trie<4, NLeaf>& trie, bool maximum, ofstream& log)
  *
  * \param trie Trie.
  * \param files Input file names.
- * \param length Word length.
+ * \param wordLength Word length.
  * \param dirName Output directory.
  * \param log Log handle.
  */
 void writeFiltered(
-    Trie<4, NLeaf>& trie, vector<string> files, size_t length,
+    Trie<4, NLeaf>& trie, vector<string> files, size_t wordLength,
     string dirName, ofstream& log) {
   size_t start = startMessage(log, "Writing filtered results");
 
@@ -155,7 +155,7 @@ void writeFiltered(
   }
 
   for (vector<Read*> reads: readFiles(files)) {
-    Word word = makeWord(reads, length);
+    Word word = makeWord(reads, wordLength);
     if (not word.filtered) {
       Node<4, NLeaf>* node = trie.find(word.data);
       if (
@@ -182,12 +182,12 @@ void writeFiltered(
  *
  * \param trie Trie.
  * \param files Input file names.
- * \param length Word length.
+ * \param wordLength Word length.
  * \param dirName Output directory.
  * \param log Log handle.
  */
 void writeAnnotated(
-    Trie<4, NLeaf>& trie, vector<string> files, size_t length,
+    Trie<4, NLeaf>& trie, vector<string> files, size_t wordLength,
     string dirName, ofstream& log) {
   size_t start = startMessage(log, "Writing annotated results");
 
@@ -198,7 +198,7 @@ void writeAnnotated(
   }
 
   for (vector<Read*> reads: readFiles(files)) {
-    Word word = makeWord(reads, length);
+    Word word = makeWord(reads, wordLength);
     if (not word.filtered) {
       Node<4, NLeaf>* node = trie.find(word.data);
 
@@ -299,11 +299,10 @@ void dedup(
     bool runStats, bool filter, bool annotate, bool edit, bool maximum,
     vector<string> files) {
   Trie<4, NLeaf> trie;
-  size_t length = wordLength / files.size();
 
   ofstream log(logName.c_str(), ios::out | ios::binary);
 
-  tuple<size_t, size_t> input = readData(trie, files, length, log);
+  tuple<size_t, size_t> input = readData(trie, files, wordLength, log);
 
   size_t unique;
   if (edit) {
@@ -317,10 +316,10 @@ void dedup(
 
   create_directories(dirName);
   if (filter) {
-    writeFiltered(trie, files, length, dirName, log);
+    writeFiltered(trie, files, wordLength, dirName, log);
   }
   if (annotate) {
-    writeAnnotated(trie, files, length, dirName, log);
+    writeAnnotated(trie, files, wordLength, dirName, log);
   }
   if (runStats) {
     tuple<map<size_t, size_t>, map<size_t, size_t>> stats = runStatistics(

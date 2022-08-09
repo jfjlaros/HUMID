@@ -87,8 +87,9 @@ generator<vector<Read*>> readFiles(vector<string> files) {
  *
  * \return Word.
  */
-Word makeWord(vector<Read*>& reads, size_t length) {
+Word makeWord(vector<Read*>& reads, size_t wordLength) {
   Word word;
+  size_t length = wordLength / reads.size();
   for (Read* read: reads) {
     for (size_t i = 0; i < length; i++) {
       char nucleotide = (*read->mSeq)[i];
