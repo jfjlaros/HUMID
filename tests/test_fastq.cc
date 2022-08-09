@@ -8,7 +8,7 @@ TEST_CASE("Test extracting a UMI from a fastp Read pointer") {
   REQUIRE(extractUMI(&hasUMI) == "AATT");
 }
 
-TEST_CASE("Extract UMI from FastQ header") {
+TEST_CASE("Test extracting UMI from FastQ header") {
   // Tests for read without UMI in header
   REQUIRE(_extractUMI("header") == "");
   REQUIRE(_extractUMI("header with spaces") == "");
@@ -22,4 +22,17 @@ TEST_CASE("Extract UMI from FastQ header") {
   REQUIRE(_extractUMI("header_AATT with spaces") == "AATT");
   REQUIRE(_extractUMI("header_with_many_underscores_AATT") == "AATT");
   REQUIRE(_extractUMI("header_with_many_underscores_AATT and space") == "AATT");
+}
+
+TEST_CASE("Test making a Word out of a vector of Reads") {
+  Read read1("header", "AAAA", "", "");
+  Read read2("header2", "TTTT", "", "");
+  vector<Read*> reads;
+  reads.push_back(&read1);
+  reads.push_back(&read2);
+  REQUIRE(true);
+
+  Word word = makeWord(reads, 4);
+  vector<uint8_t> expected = { 0, 0, 0, 0, 3, 3, 3, 3};
+  REQUIRE(word.data == expected);
 }
