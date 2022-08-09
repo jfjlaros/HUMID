@@ -140,3 +140,14 @@ TEST_CASE("Test finding all occurrences of char in string") {
   expected = { 2, 5, 6, 9 };
   REQUIRE(findAll(':',"01:34::78:") == expected);
 }
+
+TEST_CASE("Test if a string is a valid UMI") {
+  // Invalid UMIs
+  REQUIRE(not _validUMI(""));
+  REQUIRE(not _validUMI("atcg"));
+  REQUIRE(not _validUMI("ATCGP"));
+
+  // Valid UMIs
+  REQUIRE(_validUMI("A"));
+  REQUIRE(_validUMI("ATCGN"));
+}

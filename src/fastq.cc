@@ -193,12 +193,27 @@ string _extractUMI(string header) {
   }
   // Check if the UMI only contains characters from 'ATCGN'. If we find any
   // other character, the 'UMI' is not actually a UMI.
-  for (char c: UMI) {
+  if (_validUMI(UMI)) {
+    return UMI;
+  }
+  else {
+    return "";
+  }
+}
+
+bool _validUMI(string UMI) {
+  // An empty UMI is not valid
+  if (UMI.empty()) {
+    return false;
+  }
+
+  // Only ATCG is valid in a UMI
+  for (char const &c: UMI) {
     if (not nuc.contains(c)) {
-      return "";
+      return false;
     }
   }
-  return UMI;
+  return true;
 }
 
 /*!
