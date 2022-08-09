@@ -80,26 +80,40 @@ generator<vector<Read*>> readFiles(vector<string> files) {
 }
 
 /*!
- * Select `length` nucleotides from every read in `reads` to create a word.
+ * Extract `wordLength` nucleotides from `reads`
+ * If the first file has a UMI in the header, this will get preference.
+ */
+
+vector<char> getNucleotides(vector<Read*>& reads, size_t wordLength) {
+  vector<char> nucleotides;
+  size_t length = wordLength / reads.size();
+  for (Read* read: reads) {
+    for (size_t i = 0; i < length; i++) {
+      char nucleotide = (*read->mSeq)[i];
+      nucleotides.push_back(nucleotide);
+    }
+  }
+  return nucleotides;
+}
+/*!
+ * Select a total of `wordLength` nucleotides from every read in `reads` to
+ * create a word.
  *
  * \param reads Reads.
- * \param length Read selection length.
+ * \param wordLength Read selection length.
  *
  * \return Word.
  */
 Word makeWord(vector<Read*>& reads, size_t wordLength) {
   Word word;
-  size_t length = wordLength / reads.size();
-  for (Read* read: reads) {
-    for (size_t i = 0; i < length; i++) {
-      char nucleotide = (*read->mSeq)[i];
-      if (nuc.contains(nucleotide)) {
-        word.data.push_back(nuc[nucleotide]);
-      }
-      else {
-        word.data.push_back(nuc['G']);
-        word.filtered = true;
-      }
+  vector<char> nucleotides = getNucleotides(reads, wordLength);
+  for (char nucleotide: nucleotides) {
+    if (nuc.contains(nucleotide)) {
+      word.data.push_back(nuc[nucleotide]);
+    }
+    else {
+      word.data.push_back(nuc['G']);
+      word.filtered = true;
     }
   }
   return word;

@@ -25,3 +25,4 @@ string makeFileName(string, string, string);
 vector<string> makeFileNames(vector<string>, string, string);
 string _extractUMI(string);
 string extractUMI(Read*);
+vector<char> getNucleotides(vector<Read*>&, size_t);
