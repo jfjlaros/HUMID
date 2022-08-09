@@ -10,7 +10,6 @@ using std::map;
 using std::unordered_set;
 
 map<char, uint8_t> nuc = {{'A', 0}, {'C', 1}, {'G', 2}, {'T', 3}};
-unordered_set<char> nnuc = {'A', 'T', 'C', 'G', 'N'};
 
 /*
  * Read vector.
@@ -195,7 +194,7 @@ string _extractUMI(string header) {
   // Check if the UMI only contains characters from 'ATCGN'. If we find any
   // other character, the 'UMI' is not actually a UMI.
   for (char c: UMI) {
-    if (nnuc.find(c) == nnuc.end()) {
+    if (not nuc.contains(c)) {
       return "";
     }
   }
