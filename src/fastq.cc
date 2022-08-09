@@ -10,6 +10,7 @@ using std::map;
 using std::unordered_set;
 
 map<char, uint8_t> nuc = {{'A', 0}, {'C', 1}, {'G', 2}, {'T', 3}};
+unordered_set<char> nnuc = {'A', 'T', 'C', 'G', 'N'};
 
 /*
  * Read vector.
@@ -208,8 +209,8 @@ bool _validUMI(string UMI) {
   }
 
   // Only ATCG is valid in a UMI
-  for (char const &c: UMI) {
-    if (not nuc.contains(c)) {
+  for (char c: UMI) {
+    if (nnuc.find(c) == nnuc.end()) {
       return false;
     }
   }

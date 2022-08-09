@@ -146,6 +146,7 @@ TEST_CASE("Test if a string is a valid UMI") {
   REQUIRE(not _validUMI(""));
   REQUIRE(not _validUMI("atcg"));
   REQUIRE(not _validUMI("ATCGP"));
+  REQUIRE(not _validUMI("1234"));
 
   // Valid UMIs
   REQUIRE(_validUMI("A"));
