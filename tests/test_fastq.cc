@@ -69,3 +69,67 @@ TEST_CASE("Test extracting nucleotides from header and read"){
 
   REQUIRE(nucleotides == expected);
 }
+
+TEST_CASE("Test dividing nucleotides over files") {
+  // Vector for the expected result
+  vector<size_t> expected;
+
+  //1 file, 10 nt
+  expected = { 10 };
+  REQUIRE(_ntFromFile(1, 10) == expected);
+
+  //3 files, 1 nt
+  expected = { 0, 0, 1 };
+  REQUIRE(_ntFromFile(3, 1) == expected);
+
+  //3 files, 2 nt
+  expected = { 0, 0, 2 };
+  REQUIRE(_ntFromFile(3, 2) == expected);
+
+  //3 files, 3 nt
+  expected = { 1, 1, 1 };
+  REQUIRE(_ntFromFile(3, 3) == expected);
+
+  //3 files, 13 nt
+  expected = { 4, 4, 5 };
+  REQUIRE(_ntFromFile(3, 13) == expected);
+
+  //3 files, 12 nt
+  expected = { 4, 4, 4 };
+  REQUIRE(_ntFromFile(3, 12) == expected);
+
+  //3 files, 11 nt
+  expected = { 3, 3, 5 };
+  REQUIRE(_ntFromFile(3, 11) == expected);
+
+  //3 files, 10 nt
+  expected = { 3, 3, 4 };
+  REQUIRE(_ntFromFile(3, 10) == expected);
+
+  //3 files, 9 nt
+  expected = { 3, 3, 3 };
+  REQUIRE(_ntFromFile(3, 9) == expected);
+}
+
+TEST_CASE("Test extracting nucleotides from header and read when wordSize has remainder"){
+  Read read1("header_AAAA", "TTTT", "", "");
+  Read read2("header", "GGGG", "", "");
+  vector<Read*> reads{ &read1, &read2 };
+
+  vector<char> nuc = getNucleotides(reads, 11);
+  string nucleotides = string(nuc.data(), nuc.size());
+  string expected = "AAAATTTGGGG";
+
+  REQUIRE(nucleotides == expected);
+}
+
+TEST_CASE("Test extracting only the large UMI from the header"){
+  Read read("header_AAAAAA", "TTTT", "", "");
+  vector<Read*> reads{&read};
+
+  vector<char> nuc = getNucleotides(reads, 4);
+  string nucleotides = string(nuc.data(), nuc.size());
+  string expected = "AAAA";
+
+  REQUIRE(nucleotides == expected);
+}

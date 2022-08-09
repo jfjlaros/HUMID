@@ -83,7 +83,6 @@ generator<vector<Read*>> readFiles(vector<string> files) {
  * Extract `wordLength` nucleotides from `reads`
  * If the first file has a UMI in the header, this will get preference.
  */
-
 vector<char> getNucleotides(vector<Read*>& reads, size_t wordLength) {
   vector<char> nucleotides;
 
@@ -91,25 +90,20 @@ vector<char> getNucleotides(vector<Read*>& reads, size_t wordLength) {
   string headerUMI = extractUMI(reads.front());
   for (size_t i=0; i < wordLength and i < headerUMI.size(); i++) {
       nucleotides.push_back(headerUMI[i]);
-    }
+  }
 
   // The length we still have available from wordLength after extracting the
   // UMI from the header
-  size_t length;
+  size_t length = wordLength - nucleotides.size();
 
-  // If the UMI in the header is longer (or the same size) as the wordLength,
-  // we are done
-  if (wordLength <= headerUMI.size()) {
-    return nucleotides;
-  }
-  else {
-    length = (wordLength - headerUMI.size())/ reads.size();
-  }
+  // The number of nt to take from each file
+  vector<size_t> ntToTake = _ntFromFile(reads.size(), length);
 
-  //size_t length = wordLength / reads.size();
-  for (Read* read: reads) {
-    for (size_t i = 0; i < length; i++) {
-      char nucleotide = (*read->mSeq)[i];
+  for (size_t i = 0; i < reads.size(); i++) {
+    Read* read = reads[i];
+    size_t length = ntToTake[i];
+    for (size_t pos = 0; pos < length; pos++) {
+      char nucleotide = (*read->mSeq)[pos];
       nucleotides.push_back(nucleotide);
     }
   }
@@ -215,4 +209,24 @@ string _extractUMI(string header) {
  */
 string extractUMI(Read* read) {
   return _extractUMI(*read->mName);
+}
+
+/*!
+ * Divide `length` nucleotides over `files`, with the remainder used on the
+ * last file.
+ *
+ * \param files Number of files.
+ * \param length Total number of nucleotides to divide.
+ */
+vector<size_t> _ntFromFile(size_t files, size_t length) {
+  vector<size_t> v{};
+  size_t div = length / files;
+  size_t remainder = length % files;
+  // All items are set to div, except the last one
+  for (size_t i = 0; i < files -1; i++) {
+    v.push_back(div);
+  }
+  // Remainder is added to the last item
+  v.push_back(div+remainder);
+  return v;
 }

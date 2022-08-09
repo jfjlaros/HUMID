@@ -26,3 +26,4 @@ vector<string> makeFileNames(vector<string>, string, string);
 string _extractUMI(string);
 string extractUMI(Read*);
 vector<char> getNucleotides(vector<Read*>&, size_t);
+vector<size_t> _ntFromFile(size_t, size_t);
