@@ -39,13 +39,22 @@ TEST_CASE("Test making a Word out of a vector of Reads") {
 TEST_CASE("Test extracting nucleotides from a vector of Reads") {
   Read read1("header", "AAAA", "", "");
   Read read2("header2", "TTTT", "", "");
-  vector<Read*> reads;
-  reads.push_back(&read1);
-  reads.push_back(&read2);
+  vector<Read*> reads { &read1, &read2};
 
   vector<char> nuc = getNucleotides(reads, 8);
   string nucleotides = string(nuc.data(), nuc.size());
   string expected = "AAAATTTT";
+
+  REQUIRE(nucleotides == expected);
+}
+
+TEST_CASE("Test extracting UMI from read when UMI is longer than wordSize") {
+  Read read("header_AAAA", "TTTT", "", "");
+  vector<Read*> reads{ &read };
+
+  vector<char> nuc = getNucleotides(reads, 3);
+  string nucleotides = string(nuc.data(), nuc.size());
+  string expected = "AAA";
 
   REQUIRE(nucleotides == expected);
 }

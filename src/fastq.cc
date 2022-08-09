@@ -86,6 +86,16 @@ generator<vector<Read*>> readFiles(vector<string> files) {
 
 vector<char> getNucleotides(vector<Read*>& reads, size_t wordLength) {
   vector<char> nucleotides;
+  string headerUMI = extractUMI(reads.front());
+
+  // If the UMI in the header is longer (or the same size) as the wordLength
+  if (headerUMI.size() >= wordLength) {
+    for (size_t i=0; i < wordLength; i++) {
+      nucleotides.push_back(headerUMI[i]);
+    }
+    return nucleotides;
+  }
+
   size_t length = wordLength / reads.size();
   for (Read* read: reads) {
     for (size_t i = 0; i < length; i++) {
