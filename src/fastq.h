@@ -29,3 +29,4 @@ vector<char> getNucleotides(vector<Read*>&, size_t);
 vector<size_t> _ntFromFile(size_t, size_t);
 vector<size_t> findAll(char, string);
 bool _validUMI(string);
+string _extractUnderscoreUMI(string);

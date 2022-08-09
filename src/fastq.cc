@@ -179,19 +179,13 @@ vector<string> makeFileNames(vector<string> files, string dir, string suffix) {
  */
 string _extractUMI(string header) {
   size_t first_space = header.find(" ");
-  size_t umiStart = header.substr(0, first_space).find_last_of("_");
 
-  // We need to do some sanity checking on the eventual 'UMI' we find.
-  string UMI;
+  // The UMI must be before the first space
+  string substr = header.substr(0, first_space);
 
-  // If there is no underscore in the header, there is no UMI.
-  if (umiStart == string::npos) {
-    UMI="";
-  }
-  // Get the string between the last _ and the first space.
-  else {
-    UMI = header.substr(umiStart + 1, first_space - umiStart - 1);
-  }
+  // If we detect a UMI with a _ separator, we return that UMI
+  string UMI = _extractUnderscoreUMI(substr);
+
   // Check if the UMI only contains characters from 'ATCGN'. If we find any
   // other character, the 'UMI' is not actually a UMI.
   if (_validUMI(UMI)) {
@@ -202,6 +196,19 @@ string _extractUMI(string header) {
   }
 }
 
+string _extractUnderscoreUMI(string header) {
+  // The UMI should start after the last underscore
+  size_t umiStart = header.find_last_of("_") + 1;
+
+  return header.substr(umiStart);
+}
+
+/*!
+ * Determine of UMI is a valid UMI. It must be non-emtpy and only contain
+ * characters from ATCGN
+ *
+ * \param UMI The UMI to check
+ */
 bool _validUMI(string UMI) {
   // An empty UMI is not valid
   if (UMI.empty()) {
