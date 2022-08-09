@@ -58,3 +58,14 @@ TEST_CASE("Test extracting UMI from read when UMI is longer than wordSize") {
 
   REQUIRE(nucleotides == expected);
 }
+
+TEST_CASE("Test extracting nucleotides from header and read"){
+  Read read("header_AAAA", "TTTT", "", "");
+  vector<Read*> reads{ &read };
+
+  vector<char> nuc = getNucleotides(reads, 6);
+  string nucleotides = string(nuc.data(), nuc.size());
+  string expected = "AAAATT";
+
+  REQUIRE(nucleotides == expected);
+}

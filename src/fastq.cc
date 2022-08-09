@@ -86,17 +86,27 @@ generator<vector<Read*>> readFiles(vector<string> files) {
 
 vector<char> getNucleotides(vector<Read*>& reads, size_t wordLength) {
   vector<char> nucleotides;
-  string headerUMI = extractUMI(reads.front());
 
-  // If the UMI in the header is longer (or the same size) as the wordLength
-  if (headerUMI.size() >= wordLength) {
-    for (size_t i=0; i < wordLength; i++) {
+  // Pull the UMI from the header of the first read
+  string headerUMI = extractUMI(reads.front());
+  for (size_t i=0; i < wordLength and i < headerUMI.size(); i++) {
       nucleotides.push_back(headerUMI[i]);
     }
+
+  // The length we still have available from wordLength after extracting the
+  // UMI from the header
+  size_t length;
+
+  // If the UMI in the header is longer (or the same size) as the wordLength,
+  // we are done
+  if (wordLength <= headerUMI.size()) {
     return nucleotides;
   }
+  else {
+    length = (wordLength - headerUMI.size())/ reads.size();
+  }
 
-  size_t length = wordLength / reads.size();
+  //size_t length = wordLength / reads.size();
   for (Read* read: reads) {
     for (size_t i = 0; i < length; i++) {
       char nucleotide = (*read->mSeq)[i];
@@ -105,6 +115,7 @@ vector<char> getNucleotides(vector<Read*>& reads, size_t wordLength) {
   }
   return nucleotides;
 }
+
 /*!
  * Select a total of `wordLength` nucleotides from every read in `reads` to
  * create a word.
