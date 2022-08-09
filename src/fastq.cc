@@ -229,3 +229,19 @@ vector<size_t> _ntFromFile(size_t files, size_t length) {
   v.push_back(div+remainder);
   return v;
 }
+
+/*!
+ * Find all ocurrences of c in string
+ *
+ * \param char Character to find
+ * \param string String to find `char` in
+ */
+vector<size_t> findAll(char c, string string) {
+  vector<size_t> v;
+  size_t pos = string.find(c);
+  while (pos != string::npos) {
+    v.push_back(pos);
+    pos = string.find(c, pos + 1);
+  }
+  return v;
+}

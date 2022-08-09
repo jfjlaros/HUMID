@@ -133,3 +133,10 @@ TEST_CASE("Test extracting only the large UMI from the header"){
 
   REQUIRE(nucleotides == expected);
 }
+
+TEST_CASE("Test finding all occurrences of char in string") {
+  vector<size_t> expected;
+
+  expected = { 2, 5, 6, 9 };
+  REQUIRE(findAll(':',"01:34::78:") == expected);
+}
