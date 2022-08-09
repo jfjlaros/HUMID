@@ -191,6 +191,12 @@ string _extractUMI(string header) {
   if (_validUMI(UMI)) {
     return UMI;
   }
+
+  // Otherwise, we check to see if we find a BCL Convert style UMI
+  UMI = _extract_BCL_UMI(substr);
+  if (_validUMI(UMI)) {
+    return UMI;
+  }
   else {
     return "";
   }
@@ -201,6 +207,25 @@ string _extractUnderscoreUMI(string header) {
   size_t umiStart = header.find_last_of("_") + 1;
 
   return header.substr(umiStart);
+}
+
+string _extract_BCL_UMI(string header) {
+  // Find all colons in the header
+  vector<size_t> col = findAll(':', header);
+
+  // There should be 8 fields, so 7 seperators
+  if (col.size() < 7) {
+    return "";
+  }
+
+  // The UMI is between the 7th and 8th colon
+  if (col.size() > 7) {
+    size_t size = col[7] - col[6] - 1;
+    return header.substr(col[6] + 1, size);
+  }
+  else {
+    return header.substr(col[6] + 1);
+  }
 }
 
 /*!

@@ -30,3 +30,4 @@ vector<size_t> _ntFromFile(size_t, size_t);
 vector<size_t> findAll(char, string);
 bool _validUMI(string);
 string _extractUnderscoreUMI(string);
+string _extract_BCL_UMI(string);

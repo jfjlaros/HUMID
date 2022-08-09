@@ -6,6 +6,9 @@
 TEST_CASE("Test extracting a UMI from a fastp Read pointer") {
   Read hasUMI("header_AATT", "", "", "", "");
   REQUIRE(extractUMI(&hasUMI) == "AATT");
+
+  Read BCL("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG", "", "", "");
+  REQUIRE(extractUMI(&BCL) == "ATCG");
 }
 
 TEST_CASE("Test extracting UMI from FastQ header") {
@@ -151,4 +154,10 @@ TEST_CASE("Test if a string is a valid UMI") {
   // Valid UMIs
   REQUIRE(_validUMI("A"));
   REQUIRE(_validUMI("ATCGN"));
+}
+
+TEST_CASE("Test extracting a BCL Convert UMI string") {
+  REQUIRE(_extract_BCL_UMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG:random") == "ATCG");
+  REQUIRE(_extract_BCL_UMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG") == "ATCG");
+  REQUIRE(_extract_BCL_UMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y") == "");
 }
