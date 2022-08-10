@@ -46,6 +46,12 @@ TEST_CASE("Test fetching more than read length") {
 
   REQUIRE_THROWS(getNucleotides(reads, 9));
   REQUIRE_NOTHROW(getNucleotides(reads, 8));
+
+  Read umiOnly("header_AAAA", "", "", "");
+  vector<Read*> reads2{ &umiOnly };
+  REQUIRE_THROWS(getNucleotides(reads2, 5));
+  REQUIRE_NOTHROW(getNucleotides(reads2, 4));
+
 }
 
 TEST_CASE("Test extracting nucleotides from a vector of Reads") {
