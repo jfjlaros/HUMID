@@ -160,4 +160,5 @@ TEST_CASE("Test extracting a BCL Convert UMI string") {
   REQUIRE(_extract_BCL_UMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG:random") == "ATCG");
   REQUIRE(_extract_BCL_UMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG") == "ATCG");
   REQUIRE(_extract_BCL_UMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y") == "");
+  REQUIRE(_extract_BCL_UMI("1:::::::AGTA::") == "AGTA");
 }
