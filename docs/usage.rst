@@ -67,4 +67,13 @@ If your data does not confirm to any of the supported schemas described above,
 we recommend fastp_ to process the UMI to one of the supported formats.
 
 
+Deduplication without UMI
+-------------------------
+If a project was sequenced without UMIs, you can still remove duplicates using
+this tool, since it will automatically take the requested number of nucleotides
+from one (single end) or two (paired end) FastQ files. Note that without random
+UMIs to distinguish identical but independent molecules, the number of
+duplicates will most likely be an overestimation, similar to using picard
+MarkDuplicates.
+
 .. _fastp: https://github.com/OpenGene/fastp#unique-molecular-identifier-umi-processing
