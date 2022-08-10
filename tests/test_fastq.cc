@@ -39,6 +39,15 @@ TEST_CASE("Test making a Word out of a vector of Reads") {
   REQUIRE(word.data == expected);
 }
 
+TEST_CASE("Test fetching more than read length") {
+
+  Read read("header_AAAA", "TTTT", "", "");
+  vector<Read*> reads{ &read };
+
+  REQUIRE_THROWS(getNucleotides(reads, 9));
+  REQUIRE_NOTHROW(getNucleotides(reads, 8));
+}
+
 TEST_CASE("Test extracting nucleotides from a vector of Reads") {
   Read read1("header", "AAAA", "", "");
   Read read2("header2", "TTTT", "", "");

@@ -1,5 +1,7 @@
 #include <iostream>
 #include <map>
+#include <sstream>
+#include <stdexcept>
 #include <unordered_set>
 
 #include "fastq.h"
@@ -96,12 +98,27 @@ vector<char> getNucleotides(vector<Read*>& reads, size_t wordLength) {
   // UMI from the header
   size_t length = wordLength - nucleotides.size();
 
-  // The number of nt to take from each file
+  // The number of nucleotides to take from each file
   vector<size_t> ntToTake = _ntFromFile(reads.size(), length);
 
   for (size_t i = 0; i < reads.size(); i++) {
     Read* read = reads[i];
     size_t length = ntToTake[i];
+
+    // Throw if the read is too short
+    if ((*read->mSeq).size() < length) {
+      std::ostringstream msg;
+      msg << "Attempted to read "
+          << length
+          << " nucleotides from "
+          << *read->mName
+          << " (length="
+          << (*read->mSeq).size()
+          << ").";
+      throw std::out_of_range( msg.str() );
+    }
+
+    // Add length nucleotides from Read
     for (size_t pos = 0; pos < length; pos++) {
       char nucleotide = (*read->mSeq)[pos];
       nucleotides.push_back(nucleotide);
