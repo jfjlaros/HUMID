@@ -257,7 +257,7 @@ bool _validUMI(string UMI) {
     return false;
   }
 
-  // Only ATCG is valid in a UMI
+  // Only ATCGN is valid in a UMI
   for (char c: UMI) {
     if (nnuc.find(c) == nnuc.end()) {
       return false;
