@@ -47,7 +47,7 @@ If UMIs are include in the header, the file with the UMI in the header must be
 the **first** specified input file. Furthermore, the UMI must be in the **8th**
 field separated with a colon, and before any spaces.
 
-Below are some examples of header with the UMI ``AGTA`` that will be
+Below are some examples of headers with the UMI ``AGTA`` that will be
 recognised.
 
 ::
@@ -64,7 +64,7 @@ and ``fastp``.
 Other UMI formats
 -----------------
 If your data does not confirm to any of the supported schemas described above,
-we recommend that you use fastp_ to process your data to a supported format.
+we recommend fastp_ to process the UMI to one of the supported formats.
 
 
 .. _fastp: https://github.com/OpenGene/fastp#unique-molecular-identifier-umi-processing
