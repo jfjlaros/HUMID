@@ -66,4 +66,5 @@ Other UMI formats
 If your data does not confirm to any of the supported schemas described above,
 we recommend that you use fastp_ to process your data to a supported format.
 
-:: _fastp: https://github.com/OpenGene/fastp#unique-molecular-identifier-umi-processing
+
+.. _fastp: https://github.com/OpenGene/fastp#unique-molecular-identifier-umi-processing
