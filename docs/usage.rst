@@ -27,7 +27,7 @@ will be no preference to include all UMI nucleotides.
 UMIs in the header with underscore
 -----------------------------------
 If UMIs are include in the header, the file with the UMI in the header must be
-the **first** specified input file.
+the **first** specified input file, and the UMI must be before any spaces.
 
 Below are some examples of headers with the UMI ``AGTA`` after an
 underscore, which will all be recognised.
@@ -44,8 +44,7 @@ This format of specifying UMIs in the read header is used by UMI-Tools.
 UMIs in the header with colon
 -----------------------------
 If UMIs are include in the header, the file with the UMI in the header must be
-the **first** specified input file. Furthermore, the UMI must be in the **8th**
-field separated with a colon, and before any spaces.
+the **first** specified input file, and the UMI must be before any spaces.
 
 Below are some examples of headers with the UMI ``AGTA`` that will be
 recognised.
@@ -54,8 +53,7 @@ recognised.
 
     @A31886:289:T5D5W10Y2:2:12686:4678:1110:AGTA
     @A31886:289:T5D5W10Y2:2:12686:4678:1110:AGTA with spaces after
-    @A31886:289:T5D5W10Y2:2:12686:4678:1110:AGTA:more:fields
-    @1:::::::AGTA::
+    @1:::::::AGTA
 
 
 This format of specifying UMIs in the read header is used by ``BCF Convert``

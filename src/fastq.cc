@@ -99,7 +99,7 @@ vector<char> getNucleotides(vector<Read*>& reads, size_t wordLength) {
   size_t length = wordLength - nucleotides.size();
 
   // The number of nucleotides to take from each file
-  vector<size_t> ntToTake = _ntFromFile(reads.size(), length);
+  vector<size_t> ntToTake = ntFromFile(reads.size(), length);
 
   for (size_t i = 0; i < reads.size(); i++) {
     Read* read = reads[i];
@@ -201,17 +201,17 @@ string _extractUMI(string header) {
   string substr = header.substr(0, first_space);
 
   // If we detect a UMI with a _ separator, we return that UMI
-  string UMI = _extractUnderscoreUMI(substr);
+  string UMI = extractLastField(substr, '_');
 
   // Check if the UMI only contains characters from 'ATCGN'. If we find any
   // other character, the 'UMI' is not actually a UMI.
-  if (_validUMI(UMI)) {
+  if (validUMI(UMI)) {
     return UMI;
   }
 
   // Otherwise, we check to see if we find a BCL Convert style UMI
-  UMI = _extract_BCL_UMI(substr);
-  if (_validUMI(UMI)) {
+  UMI = extractLastField(substr, ':');
+  if (validUMI(UMI)) {
     return UMI;
   }
   else {
@@ -219,31 +219,23 @@ string _extractUMI(string header) {
   }
 }
 
-string _extractUnderscoreUMI(string header) {
-  // The UMI should start after the last underscore
-  size_t umiStart = header.find_last_of("_") + 1;
+/*
+ * Extract the last field from string
+ *
+ * \param string String to extract field from
+ * \param sep Separator between the fields
+ */
+string extractLastField(string string, char sep) {
+  size_t last = string.find_last_of(sep);
 
-  return header.substr(umiStart);
-}
-
-string _extract_BCL_UMI(string header) {
-  // Find all colons in the header
-  vector<size_t> col = findAll(':', header);
-
-  // There should be 8 fields, so 7 seperators
-  if (col.size() < 7) {
-    return "";
-  }
-
-  // The UMI is between the 7th and 8th colon
-  if (col.size() > 7) {
-    size_t size = col[7] - col[6] - 1;
-    return header.substr(col[6] + 1, size);
+  if (last != string::npos) {
+    return string.substr(last+1);
   }
   else {
-    return header.substr(col[6] + 1);
+    return "";
   }
 }
+
 
 /*!
  * Determine of UMI is a valid UMI. It must be non-emtpy and only contain
@@ -251,7 +243,7 @@ string _extract_BCL_UMI(string header) {
  *
  * \param UMI The UMI to check
  */
-bool _validUMI(string UMI) {
+bool validUMI(string UMI) {
   // An empty UMI is not valid
   if (UMI.empty()) {
     return false;
@@ -280,9 +272,9 @@ string extractUMI(Read* read) {
  * last file.
  *
  * \param files Number of files.
- * \param length Total number of nucleotides to divide.
+ * \param lengt_h Total number of nucleotides to divide.
  */
-vector<size_t> _ntFromFile(size_t files, size_t length) {
+vector<size_t> ntFromFile(size_t files, size_t length) {
   vector<size_t> v{};
   size_t div = length / files;
   size_t remainder = length % files;
@@ -292,21 +284,5 @@ vector<size_t> _ntFromFile(size_t files, size_t length) {
   }
   // Remainder is added to the last item
   v.push_back(div+remainder);
-  return v;
-}
-
-/*!
- * Find all ocurrences of c in string
- *
- * \param char Character to find
- * \param string String to find `char` in
- */
-vector<size_t> findAll(char c, string string) {
-  vector<size_t> v;
-  size_t pos = string.find(c);
-  while (pos != string::npos) {
-    v.push_back(pos);
-    pos = string.find(c, pos + 1);
-  }
   return v;
 }
