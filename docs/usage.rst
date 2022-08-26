@@ -56,7 +56,7 @@ recognised.
     @1:::::::AGTA
 
 
-This format of specifying UMIs in the read header is used by ``BCF Convert``
+This format of specifying UMIs in the read header is used by ``BCL Convert``
 and ``fastp``.
 
 Other UMI formats
