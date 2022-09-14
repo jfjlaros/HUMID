@@ -14,7 +14,7 @@ using std::vector;
 struct Cluster {
   size_t id;
   size_t maxCount = 0;
-  struct NLeaf* maxLeaf = NULL;
+  struct NLeaf* maxLeaf = nullptr;
   size_t size = 0;
   bool visited = false;
 

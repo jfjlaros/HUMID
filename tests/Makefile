@@ -9,7 +9,7 @@ FIXTURES :=
 
 
 CC := g++
-CC_ARGS := -std=c++20 -fcoroutines -Wno-pmf-conversions
+CC_ARGS := -std=c++20 -fcoroutines
 LD_ARGS := -lisal -ldeflate
 
 

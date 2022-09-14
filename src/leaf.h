@@ -7,5 +7,5 @@
  */
 struct NLeaf : Leaf {
   vector<NLeaf*> neighbours;
-  Cluster* cluster = NULL;
+  Cluster* cluster = nullptr;
 };
