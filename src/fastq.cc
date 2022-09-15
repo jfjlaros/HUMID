@@ -82,46 +82,52 @@ generator<vector<Read*>> readFiles(vector<string> files) {
 }
 
 /*!
+ * Make string s the specified size, by either cutting it, or padding it
+ *
+ * \param s String to make a certain size
+ * \param size Size the specified string should be
+ * \param padding Character to use for padding
+ *
+ * \return New string made to size s
+ */
+string _makeStringSize(string s, size_t size, char padding) {
+  if (size == s.size()) {
+    return s;
+  }
+  if (size < s.size()) {
+    return s.substr(0, size);
+  }
+  // Add padding
+  return s.append(size - s.size(), padding);
+}
+
+/*!
  * Extract `wordLength` nucleotides from `reads`
  * If the first file has a UMI in the header, this will get preference.
  */
-vector<char> getNucleotides(vector<Read*>& reads, size_t wordLength) {
+vector<char> getNucleotides(vector<Read*>& reads, vector<size_t> ntToTake, size_t headerUMISize) {
   vector<char> nucleotides;
-  nucleotides.reserve(wordLength);
+  bool filtered = false;
 
   // Pull the UMI from the header of the first read
-  string headerUMI = extractUMI(reads.front());
-  for (size_t i = 0; i < wordLength and i < headerUMI.size(); i++) {
-      nucleotides.push_back(headerUMI[i]);
+  if (headerUMISize > 0) {
+    // Get the UMI, and cut/pad it to headerUMISize
+    string headerUMI = _makeStringSize(extractUMI(reads.front()), headerUMISize, 'N');
+    for (size_t i = 0; i < headerUMISize; i++) {
+        nucleotides.push_back(headerUMI[i]);
+    }
   }
-
-  // The length we still have available from wordLength after extracting the
-  // UMI from the header
-  size_t length = wordLength - nucleotides.size();
-
-  // The number of nucleotides to take from each file
-  vector<size_t> ntToTake = ntFromFile(reads.size(), length);
 
   for (size_t i = 0; i < reads.size(); i++) {
     Read* read = reads[i];
     size_t length = ntToTake[i];
 
-    // Throw if the read is too short
-    if ((*read->mSeq).size() < length) {
-      std::ostringstream msg;
-      msg << "Attempted to read "
-          << length
-          << " nucleotides from "
-          << *read->mName
-          << " (length="
-          << (*read->mSeq).size()
-          << ").";
-      throw std::out_of_range( msg.str() );
-    }
+    // Padd the reads with N if it is too short
+    string sequence = _makeStringSize(*read->mSeq, length, 'N');
 
     // Add length nucleotides from Read
     for (size_t pos = 0; pos < length; pos++) {
-      char nucleotide = (*read->mSeq)[pos];
+      char nucleotide = sequence[pos];
       nucleotides.push_back(nucleotide);
     }
   }
@@ -137,9 +143,9 @@ vector<char> getNucleotides(vector<Read*>& reads, size_t wordLength) {
  *
  * \return Word.
  */
-Word makeWord(vector<Read*>& reads, size_t wordLength) {
+Word makeWord(vector<Read*>& reads, vector<size_t> ntToTake, size_t headerUMISize) {
   Word word;
-  vector<char> nucleotides = getNucleotides(reads, wordLength);
+  vector<char> nucleotides = getNucleotides(reads, ntToTake, headerUMISize);
   for (char nucleotide: nucleotides) {
     if (nuc.contains(nucleotide)) {
       word.data.push_back(nuc[nucleotide]);

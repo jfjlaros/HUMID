@@ -42,24 +42,29 @@ TEST_CASE("Test making a Word out of a vector of Reads") {
   Read read2("header2", "TTTT", "", "");
   vector<Read*> reads { &read1, &read2 };
 
-  Word word = makeWord(reads, 8);
+  Word word = makeWord(reads, {4, 4}, 0);
   vector<uint8_t> expected = { 0, 0, 0, 0, 3, 3, 3, 3};
   REQUIRE(word.data == expected);
 }
 
-TEST_CASE("Test fetching more than read length") {
+TEST_CASE("Test padding when fetching more than header UMI length") {
 
   Read read("header_AAAA", "TTTT", "", "");
   vector<Read*> reads{ &read };
 
-  REQUIRE_THROWS(getNucleotides(reads, 9));
-  REQUIRE_NOTHROW(getNucleotides(reads, 8));
+  vector<char> nuc = getNucleotides(reads, {4}, 5);
+  string nucleotides = string(nuc.data(), nuc.size());
+  string expected = "AAAANTTTT";
+  REQUIRE(nucleotides == expected);
 
   Read umiOnly("header_AAAA", "", "", "");
   vector<Read*> reads2{ &umiOnly };
-  REQUIRE_THROWS(getNucleotides(reads2, 5));
-  REQUIRE_NOTHROW(getNucleotides(reads2, 4));
 
+  nuc = getNucleotides(reads2, {0}, 5);
+  nucleotides = string(nuc.data(), nuc.size());
+
+  expected = "AAAAN";
+  REQUIRE(nucleotides == expected);
 }
 
 TEST_CASE("Test extracting nucleotides from a vector of Reads") {
@@ -67,7 +72,7 @@ TEST_CASE("Test extracting nucleotides from a vector of Reads") {
   Read read2("header2", "TTTT", "", "");
   vector<Read*> reads { &read1, &read2};
 
-  vector<char> nuc = getNucleotides(reads, 8);
+  vector<char> nuc = getNucleotides(reads, {4, 4}, 0);
   string nucleotides = string(nuc.data(), nuc.size());
   string expected = "AAAATTTT";
 
@@ -78,7 +83,7 @@ TEST_CASE("Test extracting UMI from read when UMI is longer than wordSize") {
   Read read("header_AAAA", "TTTT", "", "");
   vector<Read*> reads{ &read };
 
-  vector<char> nuc = getNucleotides(reads, 3);
+  vector<char> nuc = getNucleotides(reads, {0}, 3);
   string nucleotides = string(nuc.data(), nuc.size());
   string expected = "AAA";
 
@@ -89,7 +94,7 @@ TEST_CASE("Test extracting nucleotides from header and read"){
   Read read("header_AAAA", "TTTT", "", "");
   vector<Read*> reads{ &read };
 
-  vector<char> nuc = getNucleotides(reads, 6);
+  vector<char> nuc = getNucleotides(reads, {2}, 4);
   string nucleotides = string(nuc.data(), nuc.size());
   string expected = "AAAATT";
 
@@ -142,7 +147,7 @@ TEST_CASE("Test extracting nucleotides from header and read when wordSize has re
   Read read2("header", "GGGG", "", "");
   vector<Read*> reads{ &read1, &read2 };
 
-  vector<char> nuc = getNucleotides(reads, 11);
+  vector<char> nuc = getNucleotides(reads, {3, 4}, 4);
   string nucleotides = string(nuc.data(), nuc.size());
   string expected = "AAAATTTGGGG";
 
@@ -153,12 +158,24 @@ TEST_CASE("Test extracting only the large UMI from the header"){
   Read read("header_AAAAAA", "TTTT", "", "");
   vector<Read*> reads{&read};
 
-  vector<char> nuc = getNucleotides(reads, 4);
+  vector<char> nuc = getNucleotides(reads, {0}, 4);
   string nucleotides = string(nuc.data(), nuc.size());
   string expected = "AAAA";
 
   REQUIRE(nucleotides == expected);
 }
+
+TEST_CASE("Test extracting more nucleotides than available from a read") {
+  Read read("header", "TTTT", "", "");
+  vector<Read*> reads{&read};
+
+  vector<char> nuc = getNucleotides(reads, {5}, 0);
+  string nucleotides = string(nuc.data(), nuc.size());
+  string expected = "TTTTN";
+
+  REQUIRE(nucleotides == expected);
+}
+
 
 TEST_CASE("Test if a string is a valid UMI") {
   // Invalid UMIs
@@ -179,4 +196,11 @@ TEST_CASE("Test extracting the last field from a string") {
   REQUIRE(extractLastField("empty:", ':') == "");
   REQUIRE(extractLastField("last:field", ':') == "field");
   REQUIRE(extractLastField("three:differient:fields", ':') == "fields");
+}
+
+TEST_CASE("Test making a string a given size") {
+  REQUIRE(_makeStringSize("AA", 0, 'N') == "");
+  REQUIRE(_makeStringSize("AA", 1, 'N') == "A");
+  REQUIRE(_makeStringSize("AA", 2, 'N') == "AA");
+  REQUIRE(_makeStringSize("AA", 3, 'N') == "AAN");
 }
