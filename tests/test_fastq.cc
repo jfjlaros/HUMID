@@ -3,38 +3,43 @@
 #include "../src/fastq.h"
 
 
-TEST_CASE("Test extracting a UMI from a fastp Read pointer") {
-  Read hasUMI("header_AATT", "", "", "", "");
-  REQUIRE(extractUMI(&hasUMI) == "AATT");
+TEST_CASE("Extract UMI from header") {
+  SECTION("Extract UMI from read pointer") {
+    Read hasUMI("header_AATT", "", "", "", "");
+    REQUIRE(extractUMI(&hasUMI) == "AATT");
 
-  Read BCL("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG", "", "", "");
-  REQUIRE(extractUMI(&BCL) == "ATCG");
-}
+    Read BCL("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG", "", "", "");
+    REQUIRE(extractUMI(&BCL) == "ATCG");
+  }
+  SECTION("Extract UMI with underscore") {
+    SECTION("No UMI in header") {
+      REQUIRE(_extractUMI("header") == "");
+      REQUIRE(_extractUMI("header with spaces") == "");
+      REQUIRE(_extractUMI("header_with_many_underscores and space") == "");
+      REQUIRE(_extractUMI("header_ignore_lowercase_umi_aatt") == "");
+      REQUIRE(_extractUMI("header space then_underscore") == "");
+      REQUIRE(_extractUMI("header space then_underscore_AATT") == "");
+    }
 
-TEST_CASE("Test extracting UMI from FastQ header with underscore") {
-  // Tests for read without UMI in header
-  REQUIRE(_extractUMI("header") == "");
-  REQUIRE(_extractUMI("header with spaces") == "");
-  REQUIRE(_extractUMI("header_with_many_underscores and space") == "");
-  REQUIRE(_extractUMI("header_ignore_lowercase_umi_aatt") == "");
-  REQUIRE(_extractUMI("header space then_underscore") == "");
-  REQUIRE(_extractUMI("header space then_underscore_AATT") == "");
+    SECTION("UMI in header") {
+      REQUIRE(_extractUMI("header_AATT") == "AATT");
+      REQUIRE(_extractUMI("header_AATT with spaces") == "AATT");
+      REQUIRE(_extractUMI("header_with_many_underscores_AATT") == "AATT");
+      REQUIRE(_extractUMI("header_with_many_underscores_AATT and space") == "AATT");
+    }
+  }
 
-  // Tests for reads with UMI in header
-  REQUIRE(_extractUMI("header_AATT") == "AATT");
-  REQUIRE(_extractUMI("header_AATT with spaces") == "AATT");
-  REQUIRE(_extractUMI("header_with_many_underscores_AATT") == "AATT");
-  REQUIRE(_extractUMI("header_with_many_underscores_AATT and space") == "AATT");
-}
+  SECTION("Extract UMI with colon") {
+    SECTION("No UMI in header") {
+      REQUIRE(_extractUMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y more stuf") == "");
+    }
 
-TEST_CASE("Test extracting UMI from FastQ header with colon") {
-  // Tests for read without UMI in the header
-  REQUIRE(_extractUMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y more stuf") == "");
-
-  // Test for read with UMI in the header
-  REQUIRE(_extractUMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG") == "ATCG");
-  REQUIRE(_extractUMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG more stuf") == "ATCG");
-  REQUIRE(_extractUMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG more_underscore") == "ATCG");
+    SECTION("UMI in header") {
+      REQUIRE(_extractUMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG") == "ATCG");
+      REQUIRE(_extractUMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG more stuf") == "ATCG");
+      REQUIRE(_extractUMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG more_underscore") == "ATCG");
+    }
+  }
 }
 
 TEST_CASE("Test making a Word out of a vector of Reads") {
@@ -47,58 +52,58 @@ TEST_CASE("Test making a Word out of a vector of Reads") {
   REQUIRE(word.data == expected);
 }
 
-TEST_CASE("Test padding when fetching more than header UMI length") {
+TEST_CASE("Test padding) when fetching more than header UMI length") {
+  // Test reads
+  Read read1("header_AAAA", "TTTT", "", "");
+  Read read2("header", "GGGG", "", "");
+  vector<Read*> reads{ &read1, &read2 };
 
-  Read read("header_AAAA", "TTTT", "", "");
-  vector<Read*> reads{ &read };
+  // To store the results
+  vector<char> nuc;
+  string nucleotides;
+  string expected;
 
-  vector<char> nuc = getNucleotides(reads, {4}, 5);
-  string nucleotides = string(nuc.data(), nuc.size());
-  string expected = "AAAANTTTT";
-  REQUIRE(nucleotides == expected);
+  SECTION("Extract full reads and UMI from the header") {
+    nuc = getNucleotides(reads, {4, 4}, 4);
+    nucleotides = string(nuc.data(), nuc.size());
+    expected = "AAAATTTTGGGG";
+    REQUIRE(nucleotides == expected);
+  }
 
-  Read umiOnly("header_AAAA", "", "", "");
-  vector<Read*> reads2{ &umiOnly };
+  SECTION("Test padding of UMI header") {
+    nuc = getNucleotides(reads, {4, 4}, 6);
+    nucleotides = string(nuc.data(), nuc.size());
+    expected = "AAAANNTTTTGGGG";
+    REQUIRE(nucleotides == expected);
+  }
 
-  nuc = getNucleotides(reads2, {0}, 5);
-  nucleotides = string(nuc.data(), nuc.size());
+  SECTION("Test padding of regular reads") {
+    nuc = getNucleotides(reads, {5, 5}, 4);
+    nucleotides = string(nuc.data(), nuc.size());
+    expected = "AAAATTTTNGGGGN";
+    REQUIRE(nucleotides == expected);
+  }
 
-  expected = "AAAAN";
-  REQUIRE(nucleotides == expected);
-}
+  SECTION("Test extracting a subset of UMI from the header") {
+    nuc = getNucleotides(reads, {0, 0}, 3);
+    nucleotides = string(nuc.data(), nuc.size());
+    expected = "AAA";
+    REQUIRE(nucleotides == expected);
+  }
 
-TEST_CASE("Test extracting nucleotides from a vector of Reads") {
-  Read read1("header", "AAAA", "", "");
-  Read read2("header2", "TTTT", "", "");
-  vector<Read*> reads { &read1, &read2};
+  SECTION("Test extracting a subset from the reads") {
+    nuc = getNucleotides(reads, {2, 2}, 0);
+    nucleotides = string(nuc.data(), nuc.size());
+    expected="TTGG";
+    REQUIRE(nucleotides == expected);
+  }
 
-  vector<char> nuc = getNucleotides(reads, {4, 4}, 0);
-  string nucleotides = string(nuc.data(), nuc.size());
-  string expected = "AAAATTTT";
-
-  REQUIRE(nucleotides == expected);
-}
-
-TEST_CASE("Test extracting UMI from read when UMI is longer than wordSize") {
-  Read read("header_AAAA", "TTTT", "", "");
-  vector<Read*> reads{ &read };
-
-  vector<char> nuc = getNucleotides(reads, {0}, 3);
-  string nucleotides = string(nuc.data(), nuc.size());
-  string expected = "AAA";
-
-  REQUIRE(nucleotides == expected);
-}
-
-TEST_CASE("Test extracting nucleotides from header and read"){
-  Read read("header_AAAA", "TTTT", "", "");
-  vector<Read*> reads{ &read };
-
-  vector<char> nuc = getNucleotides(reads, {2}, 4);
-  string nucleotides = string(nuc.data(), nuc.size());
-  string expected = "AAAATT";
-
-  REQUIRE(nucleotides == expected);
+  SECTION("Test extracting unequal number of nucleotides from the reads") {
+    nuc = getNucleotides(reads, {1, 3}, 0);
+    nucleotides = string(nuc.data(), nuc.size());
+    expected="TGGG";
+    REQUIRE(nucleotides == expected);
+  }
 }
 
 TEST_CASE("Test dividing nucleotides over files") {
@@ -142,18 +147,6 @@ TEST_CASE("Test dividing nucleotides over files") {
   REQUIRE(ntFromFile(3, 9) == expected);
 }
 
-TEST_CASE("Test extracting nucleotides from header and read when wordSize has remainder"){
-  Read read1("header_AAAA", "TTTT", "", "");
-  Read read2("header", "GGGG", "", "");
-  vector<Read*> reads{ &read1, &read2 };
-
-  vector<char> nuc = getNucleotides(reads, {3, 4}, 4);
-  string nucleotides = string(nuc.data(), nuc.size());
-  string expected = "AAAATTTGGGG";
-
-  REQUIRE(nucleotides == expected);
-}
-
 TEST_CASE("Test extracting only the large UMI from the header"){
   Read read("header_AAAAAA", "TTTT", "", "");
   vector<Read*> reads{&read};
@@ -165,37 +158,32 @@ TEST_CASE("Test extracting only the large UMI from the header"){
   REQUIRE(nucleotides == expected);
 }
 
-TEST_CASE("Test extracting more nucleotides than available from a read") {
-  Read read("header", "TTTT", "", "");
-  vector<Read*> reads{&read};
-
-  vector<char> nuc = getNucleotides(reads, {5}, 0);
-  string nucleotides = string(nuc.data(), nuc.size());
-  string expected = "TTTTN";
-
-  REQUIRE(nucleotides == expected);
-}
-
-
 TEST_CASE("Test if a string is a valid UMI") {
-  // Invalid UMIs
-  REQUIRE(not validUMI(""));
-  REQUIRE(not validUMI("atcg"));
-  REQUIRE(not validUMI("ATCGP"));
-  REQUIRE(not validUMI("1234"));
+  SECTION("Invalid UMIs") {
+    REQUIRE(not validUMI(""));
+    REQUIRE(not validUMI("atcg"));
+    REQUIRE(not validUMI("ATCGP"));
+    REQUIRE(not validUMI("1234"));
+  }
 
-  // Valid UMIs
-  REQUIRE(validUMI("A"));
-  REQUIRE(validUMI("ATCGN"));
+  SECTION("Valid UMIs") {
+    REQUIRE(validUMI("A"));
+    REQUIRE(validUMI("ATCGN"));
+  }
 }
 
 
 TEST_CASE("Test extracting the last field from a string") {
-  REQUIRE(extractLastField("", ':') == "");
-  REQUIRE(extractLastField("nothing", ':') == "");
-  REQUIRE(extractLastField("empty:", ':') == "");
-  REQUIRE(extractLastField("last:field", ':') == "field");
-  REQUIRE(extractLastField("three:differient:fields", ':') == "fields");
+  SECTION("Missing last field") {
+    REQUIRE(extractLastField("", ':') == "");
+    REQUIRE(extractLastField("nothing", ':') == "");
+    REQUIRE(extractLastField("empty:", ':') == "");
+  }
+
+  SECTION("Including last field") {
+    REQUIRE(extractLastField("last:field", ':') == "field");
+    REQUIRE(extractLastField("three:differient:fields", ':') == "fields");
+  }
 }
 
 TEST_CASE("Test making a string a given size") {
