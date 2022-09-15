@@ -90,7 +90,7 @@ vector<char> getNucleotides(vector<Read*>& reads, size_t wordLength) {
 
   // Pull the UMI from the header of the first read
   string headerUMI = extractUMI(reads.front());
-  for (size_t i=0; i < wordLength and i < headerUMI.size(); i++) {
+  for (size_t i = 0; i < wordLength and i < headerUMI.size(); i++) {
       nucleotides.push_back(headerUMI[i]);
   }
 
@@ -229,7 +229,7 @@ string extractLastField(string string, char sep) {
   size_t last = string.find_last_of(sep);
 
   if (last != string::npos) {
-    return string.substr(last+1);
+    return string.substr(last + 1);
   }
   else {
     return "";
@@ -279,7 +279,7 @@ vector<size_t> ntFromFile(size_t files, size_t length) {
   size_t div = length / files;
   size_t remainder = length % files;
   // All items are set to div, except the last one
-  for (size_t i = 0; i < files -1; i++) {
+  for (size_t i = 0; i < files - 1; i++) {
     v.push_back(div);
   }
   // Remainder is added to the last item
