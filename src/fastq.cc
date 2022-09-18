@@ -1,13 +1,18 @@
 #include <iostream>
 #include <map>
+#include <sstream>
+#include <stdexcept>
+#include <unordered_set>
 
 #include "fastq.h"
 
 using std::cout;
 using std::ios;
 using std::map;
+using std::unordered_set;
 
 map<char, uint8_t> nuc = {{'A', 0}, {'C', 1}, {'G', 2}, {'T', 3}};
+unordered_set<char> nnuc = {'A', 'T', 'C', 'G', 'N'};
 
 /*
  * Read vector.
@@ -77,25 +82,77 @@ generator<vector<Read*>> readFiles(vector<string> files) {
 }
 
 /*!
- * Select `length` nucleotides from every read in `reads` to create a word.
+ * Make string s the specified size, by either cutting it, or padding it
+ *
+ * \param s String to make a certain size
+ * \param size Size the specified string should be
+ * \param padding Character to use for padding
+ *
+ * \return New string made to size s
+ */
+string _makeStringSize(string s, size_t size, char padding) {
+  if (size == s.size()) {
+    return s;
+  }
+  if (size < s.size()) {
+    return s.substr(0, size);
+  }
+  // Add padding
+  return s.append(size - s.size(), padding);
+}
+
+/*!
+ * Extract `wordLength` nucleotides from `reads`
+ * If the first file has a UMI in the header, this will get preference.
+ */
+vector<char> getNucleotides(vector<Read*>& reads, vector<size_t> ntToTake, size_t headerUMISize) {
+  vector<char> nucleotides;
+  bool filtered = false;
+
+  // Pull the UMI from the header of the first read
+  if (headerUMISize > 0) {
+    // Get the UMI, and cut/pad it to headerUMISize
+    string headerUMI = _makeStringSize(extractUMI(reads.front()), headerUMISize, 'N');
+    for (size_t i = 0; i < headerUMISize; i++) {
+        nucleotides.push_back(headerUMI[i]);
+    }
+  }
+
+  for (size_t i = 0; i < reads.size(); i++) {
+    Read* read = reads[i];
+    size_t length = ntToTake[i];
+
+    // Padd the reads with N if it is too short
+    string sequence = _makeStringSize(*read->mSeq, length, 'N');
+
+    // Add length nucleotides from Read
+    for (size_t pos = 0; pos < length; pos++) {
+      char nucleotide = sequence[pos];
+      nucleotides.push_back(nucleotide);
+    }
+  }
+  return nucleotides;
+}
+
+/*!
+ * Select a total of `wordLength` nucleotides from every read in `reads` to
+ * create a word.
  *
  * \param reads Reads.
- * \param length Read selection length.
+ * \param wordLength Read selection length.
  *
  * \return Word.
  */
-Word makeWord(vector<Read*>& reads, size_t length) {
+Word makeWord(vector<Read*>& reads, vector<size_t> ntToTake, size_t headerUMISize) {
   Word word;
-  for (Read* read: reads) {
-    for (size_t i = 0; i < length; i++) {
-      char nucleotide = (*read->mSeq)[i];
-      if (nuc.contains(nucleotide)) {
-        word.data.push_back(nuc[nucleotide]);
-      }
-      else {
-        word.data.push_back(nuc['G']);
-        word.filtered = true;
-      }
+  vector<char> nucleotides = getNucleotides(reads, ntToTake, headerUMISize);
+  for (char nucleotide: nucleotides) {
+    if (nuc.contains(nucleotide)) {
+      word.data.push_back(nuc[nucleotide]);
+    }
+    else {
+      word.data.push_back(nuc['G']);
+      word.filtered = true;
     }
   }
   return word;
@@ -137,4 +194,102 @@ vector<string> makeFileNames(vector<string> files, string dir, string suffix) {
     fileNames.push_back(makeFileName(name, dir, suffix));
   }
   return fileNames;
+}
+
+/*!
+ * Extract UMI from a header
+ *
+ * \param header Fastq header line
+ */
+string _extractUMI(string header) {
+  size_t first_space = header.find(" ");
+
+  // The UMI must be before the first space
+  string substr = header.substr(0, first_space);
+
+  // If we detect a UMI with a _ separator, we return that UMI
+  string UMI = extractLastField(substr, '_');
+
+  // Check if the UMI only contains characters from 'ATCGN'. If we find any
+  // other character, the 'UMI' is not actually a UMI.
+  if (validUMI(UMI)) {
+    return UMI;
+  }
+
+  // Otherwise, we check to see if we find a BCL Convert style UMI
+  UMI = extractLastField(substr, ':');
+  if (validUMI(UMI)) {
+    return UMI;
+  }
+  else {
+    return "";
+  }
+}
+
+/*
+ * Extract the last field from string
+ *
+ * \param string String to extract field from
+ * \param sep Separator between the fields
+ */
+string extractLastField(string string, char sep) {
+  size_t last = string.find_last_of(sep);
+
+  if (last != string::npos) {
+    return string.substr(last + 1);
+  }
+  else {
+    return "";
+  }
+}
+
+
+/*!
+ * Determine of UMI is a valid UMI. It must be non-emtpy and only contain
+ * characters from ATCGN
+ *
+ * \param UMI The UMI to check
+ */
+bool validUMI(string UMI) {
+  // An empty UMI is not valid
+  if (UMI.empty()) {
+    return false;
+  }
+
+  // Only ATCGN is valid in a UMI
+  for (char c: UMI) {
+    if (nnuc.find(c) == nnuc.end()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/*!
+ * Extract UMI from a read
+ *
+ * \param read Read
+ */
+string extractUMI(Read* read) {
+  return _extractUMI(*read->mName);
+}
+
+/*!
+ * Divide `length` nucleotides over `files`, with the remainder used on the
+ * last file.
+ *
+ * \param files Number of files.
+ * \param lengt_h Total number of nucleotides to divide.
+ */
+vector<size_t> ntFromFile(size_t files, size_t length) {
+  vector<size_t> v{};
+  size_t div = length / files;
+  size_t remainder = length % files;
+  // All items are set to div, except the last one
+  for (size_t i = 0; i < files - 1; i++) {
+    v.push_back(div);
+  }
+  // Remainder is added to the last item
+  v.push_back(div+remainder);
+  return v;
 }

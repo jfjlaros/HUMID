@@ -13,25 +13,68 @@
 
 using std::filesystem::create_directories;
 using std::ios;
+using std::tie;
+
+/*!
+ * Peek at the header of the first read, to determine the size of the UMI, if
+ * any
+ *
+ * \param filename Input file name
+ *
+ * \return Size of the UMI in the header
+ */
+size_t peekUMI(string filename) {
+  FastqReader* reader = new FastqReader(filename.c_str());
+  Read* read = reader->read();
+
+  size_t umiSize = extractUMI(read).size();
+
+  delete read;
+  delete reader;
+
+  return umiSize;
+}
+
+/*!
+ * Pre-compute the nucleotides to take from the UMI header, and from each of
+ * the input files
+ */
+tuple<size_t, vector<size_t>> preCompute(vector<string> files, size_t wordLength) {
+  // Peek at the header of the first read in the first file to get the UMI size
+  size_t headerUMISize = peekUMI(files.front());
+
+  // Calculate how many nucleotes to take from each read. Any remainder will be
+  // taken from the last file
+  vector<size_t> ntToTake = ntFromFile(files.size(), wordLength - headerUMISize);
+
+  return tuple<size_t, vector<size_t>>(headerUMISize, ntToTake);
+}
 
 /*!
  * Populate a trie with words extracted from FastQ files.
  *
  * \param trie Trie.
  * \param files Input file names.
- * \param length Word length.
+ * \param wordLength Word length.
  * \param log Log handle.
  *
  * \return Total and usable number of reads.
  */
 tuple<size_t, size_t> readData(
-    Trie<4, NLeaf>& trie, vector<string> files, size_t length,
+    Trie<4, NLeaf>& trie, vector<string> files, size_t wordLength,
     ofstream& log) {
   time_t start = startMessage(log, "Reading data");
+
+  // Pre calculate some values so that we do not have to re-calculate them for
+  // every single read
+  size_t headerUMISize;
+  vector<size_t> ntToTake;
+  tie(headerUMISize, ntToTake) = preCompute(files, wordLength);
+
   size_t total = 0;
   size_t usable = 0;
   for (vector<Read*> reads: readFiles(files)) {
-    Word word = makeWord(reads, length);
+    Word word = makeWord(reads, ntToTake, headerUMISize);
     if (not word.filtered) {
       NLeaf* leaf = trie.add(word.data);
       usable++;
@@ -139,14 +182,20 @@ vector<Cluster*> findClusters(Trie<4, NLeaf>& trie, bool maximum, ofstream& log)
  *
  * \param trie Trie.
  * \param files Input file names.
- * \param length Word length.
+ * \param wordLength Word length.
  * \param dirName Output directory.
  * \param log Log handle.
  */
 void writeFiltered(
-    Trie<4, NLeaf>& trie, vector<string> files, size_t length,
+    Trie<4, NLeaf>& trie, vector<string> files, size_t wordLength,
     string dirName, ofstream& log) {
   size_t start = startMessage(log, "Writing filtered results");
+
+  // Pre calculate some values so that we do not have to re-calculate them for
+  // every single read
+  size_t headerUMISize;
+  vector<size_t> ntToTake;
+  tie(headerUMISize, ntToTake) = preCompute(files, wordLength);
 
   vector<Writer*> outFiles;
   Options options;
@@ -155,7 +204,7 @@ void writeFiltered(
   }
 
   for (vector<Read*> reads: readFiles(files)) {
-    Word word = makeWord(reads, length);
+    Word word = makeWord(reads, ntToTake, headerUMISize);
     if (not word.filtered) {
       Node<4, NLeaf>* node = trie.find(word.data);
       if (
@@ -182,14 +231,20 @@ void writeFiltered(
  *
  * \param trie Trie.
  * \param files Input file names.
- * \param length Word length.
+ * \param wordLength Word length.
  * \param dirName Output directory.
  * \param log Log handle.
  */
 void writeAnnotated(
-    Trie<4, NLeaf>& trie, vector<string> files, size_t length,
+    Trie<4, NLeaf>& trie, vector<string> files, size_t wordLength,
     string dirName, ofstream& log) {
   size_t start = startMessage(log, "Writing annotated results");
+
+  // Pre calculate some values so that we do not have to re-calculate them for
+  // every single read
+  size_t headerUMISize;
+  vector<size_t> ntToTake;
+  tie(headerUMISize, ntToTake) = preCompute(files, wordLength);
 
   vector<Writer*> outFiles;
   Options options;
@@ -198,7 +253,7 @@ void writeAnnotated(
   }
 
   for (vector<Read*> reads: readFiles(files)) {
-    Word word = makeWord(reads, length);
+    Word word = makeWord(reads, ntToTake, headerUMISize);
     if (not word.filtered) {
       Node<4, NLeaf>* node = trie.find(word.data);
 
@@ -299,11 +354,10 @@ void dedup(
     bool runStats, bool filter, bool annotate, bool edit, bool maximum,
     vector<string> files) {
   Trie<4, NLeaf> trie;
-  size_t length = wordLength / files.size();
 
   ofstream log(logName.c_str(), ios::out | ios::binary);
 
-  tuple<size_t, size_t> input = readData(trie, files, length, log);
+  tuple<size_t, size_t> input = readData(trie, files, wordLength, log);
 
   size_t unique;
   if (edit) {
@@ -317,10 +371,10 @@ void dedup(
 
   create_directories(dirName);
   if (filter) {
-    writeFiltered(trie, files, length, dirName, log);
+    writeFiltered(trie, files, wordLength, dirName, log);
   }
   if (annotate) {
-    writeAnnotated(trie, files, length, dirName, log);
+    writeAnnotated(trie, files, wordLength, dirName, log);
   }
   if (runStats) {
     tuple<map<size_t, size_t>, map<size_t, size_t>> stats = runStatistics(
