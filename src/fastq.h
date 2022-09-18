@@ -17,16 +17,15 @@ struct Word {
   bool filtered = false;
 };
 
-generator<vector<Read*>> readFiles(vector<string>);
-Word makeWord(vector<Read*>&, vector<size_t>, size_t);
-void printWord(vector<uint8_t>&);
-string addDir(char const[], string);
-string makeFileName(string, string, string);
-vector<string> makeFileNames(vector<string>, string, string);
-string _extractUMI(string);
-string extractUMI(Read*);
-vector<char> getNucleotides(vector<Read*>&, vector<size_t>, size_t);
-vector<size_t> ntFromFile(size_t, size_t);
-bool validUMI(string);
-string extractLastField(string, char);
-string _makeStringSize(string, size_t, char);
+generator<vector<Read*>> readFiles(vector<string> const);
+vector<char> getNucleotides(
+  vector<Read*> const&, vector<size_t> const, size_t const);
+Word makeWord(vector<Read*> const&, vector<size_t> const, size_t const);
+void printWord(vector<uint8_t> const&);
+string addDir(char const[], string const);
+string makeFileName(string const, string const, string const);
+vector<string> makeFileNames(vector<string> const, string const, string const);
+string extractLastField(string const, char const);
+bool validUMI(string const);
+string extractUMI(Read* const);
+vector<size_t> ntFromFile(size_t const, size_t const);
