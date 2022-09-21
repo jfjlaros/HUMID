@@ -21,7 +21,7 @@ will be no preference to include all UMI nucleotides.
 
 ::
 
-    dedup forward.fastq.gz reverse.fastq.gz umi.fastq.gz
+    humid forward.fastq.gz reverse.fastq.gz umi.fastq.gz
 
 
 UMIs in the header with underscore

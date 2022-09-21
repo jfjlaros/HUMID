@@ -57,8 +57,8 @@ Please follow the coding style conventions detailed below:
 
 
 [email]: mailto:jlaros@fixedpoint.nl
-[issues]: https://github.com/jfjlaros/dedup/issues/new
-[compare]: https://github.com/jfjlaros/dedup/compare
-[pull]: https://github.com/jfjlaros/dedup/pulls
+[issues]: https://github.com/jfjlaros/HUMID/issues/new
+[compare]: https://github.com/jfjlaros/HUMID/compare
+[pull]: https://github.com/jfjlaros/HUMID/pulls
 [cppguide]: https://google.github.io/styleguide/cppguide.html
 [doxygen]: http://doxygen.nl/

@@ -352,7 +352,7 @@ void writeStatistics(
  * \param write
  * \param files FastQ files.
  */
-void dedup(
+void humid(
     size_t const wordLength, size_t const distance, string const logName,
     string const dirName, bool const runStats, bool const filter,
     bool const annotate, bool const edit, bool const maximum,
@@ -403,7 +403,7 @@ int main(int argc, char* argv[]) {
 
   interface(
     io,
-    dedup, argv[0], "Deduplicate a dataset.", 
+    humid, argv[0], "Deduplicate a dataset.", 
       param("-n", 24, "word length"),
       param("-m", 1, "allowed mismatches"),
       param("-l", "/dev/stderr", "log file name"),
