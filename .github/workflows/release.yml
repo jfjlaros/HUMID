@@ -45,7 +45,8 @@ jobs:
           g++-11 \
           libdeflate-dev \
           libisal-dev \
-          make
+          make \
+          yasm
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 10
 
       - name: Download tar archive
