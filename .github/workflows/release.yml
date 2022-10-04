@@ -47,4 +47,3 @@ jobs:
         - name: Create release
           run: |
             gh release create ${{ env.RELEASE_VERSION}} --generate-notes humid-${{ env.RELEASE_VERSION}}.tar
-
