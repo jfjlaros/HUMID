@@ -34,7 +34,8 @@ jobs:
           name: release-tar
           path: humid-${{ env.RELEASE_VERSION}}.tar.gz
 
-  build: Build a static binary
+  build:
+    name: Build a static binary
     runs-on: ubuntu-latest
     steps:
       - name: Install build dependencies
