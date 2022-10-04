@@ -20,7 +20,7 @@ jobs:
       - name: Package source code
         shell: bash
         run: |
-          tar -cvf humid-${{ env.RELEASE_VERSION }}.tar lib/ src/
+          tar -czvf humid-${{ env.RELEASE_VERSION }}.tar.gz lib/ src/
 
       - name: Print event context
         env:
@@ -32,7 +32,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: release-tar
-          path: humid-${{ env.RELEASE_VERSION}}.tar
+          path: humid-${{ env.RELEASE_VERSION}}.tar.gz
 
   release:
       name: Create a release out of the tar archive
@@ -55,4 +55,4 @@ jobs:
           env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           run: |
-            gh release create ${{ env.RELEASE_VERSION}} --generate-notes humid-${{ env.RELEASE_VERSION}}.tar
+            gh release create ${{ env.RELEASE_VERSION}} --generate-notes humid-${{ env.RELEASE_VERSION}}.tar.gz
