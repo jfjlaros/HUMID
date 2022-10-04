@@ -1,0 +1,27 @@
+name: Publish release on tag creation
+
+on:
+  push:
+    tags:
+
+jobs:
+  package:
+    name: Packge source and dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Package source code
+        shell: bash
+        run: |
+          tar -czvf humid.tar.gz lib/ src/
+
+      - name: Print event context
+        env:
+          EVENT_CONTEXT: ${{ toJSON(github.event) }}
+        run: |
+          echo $EVENT_CONTEXT
+
+      - name: Upload archive as artifact
+        users: actions/upload-artifact@v3
+        with:
+          name: humid.tar.gz
+          path: humid.tar.gz
