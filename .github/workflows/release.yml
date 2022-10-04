@@ -7,7 +7,7 @@ on:
 
 jobs:
   package:
-    name: Packge source and dependencies
+    name: Package source and dependencies
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -34,6 +34,41 @@ jobs:
           name: release-tar
           path: humid-${{ env.RELEASE_VERSION}}.tar.gz
 
+  build: Build a static binary
+  runs-on: ubuntu-latest
+  steps:
+    - name: Install build dependencies
+      run: |
+        sudo apt update
+        sudo apt install \
+        g++-11 \
+        libdeflate-dev \
+        libisal-dev \
+        make
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 10
+
+    - name: Download tar archive
+      uses: actions/download-artifact@v3
+      with:
+        name: release-tar
+
+    - name: Unpack archive
+      run: tar -xvf humid-v1.0.13.tar.gz
+
+    - name: Configure and build isa-l
+      run: |
+        cd lib/isa-l && ./autogen.sh && ./configure && make
+
+    - name: Build static binary for humid
+      run: |
+        cd src && make static && mv static humid
+
+    - name: Upload static binary as artifact
+      users: actions/upload-artifact@v3
+      with:
+        name: release-binary
+        path: src/humid
+
   release:
       name: Create a release out of the tar archive
       needs: package
@@ -46,13 +81,18 @@ jobs:
         - name: Get shortened version of release tag
           run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
-        - name: Download package result
+        - name: Download release artifacts
           uses: actions/download-artifact@v3
           with:
             name: release-tar
+            name: release-binary
 
         - name: Create release
           env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           run: |
-            gh release create ${{ env.RELEASE_VERSION}} --generate-notes humid-${{ env.RELEASE_VERSION}}.tar.gz
+            gh release create \
+              ${{ env.RELEASE_VERSION}} \
+              --generate-notes \
+              humid-${{ env.RELEASE_VERSION}}.tar.gz \
+              humid
