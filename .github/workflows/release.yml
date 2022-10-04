@@ -50,6 +50,7 @@ jobs:
         with:
           name: release-tar
           path: humid-${{ env.RELEASE_VERSION}}.tar.gz
+          retention-days: 1
 
   build:
     name: Build a static binary
@@ -87,6 +88,7 @@ jobs:
         with:
           name: release-binary
           path: src/humid
+          retention-days: 1
 
   release:
       name: Create a release out of the tar archive
