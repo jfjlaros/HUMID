@@ -35,7 +35,7 @@ jobs:
           path: humid-${{ env.RELEASE_VERSION}}.tar
 
   release:
-      name: Create a release out of the archive
+      name: Create a release out of the tar archive
       needs: package
       runs-on: ubuntu-latest
       steps:
