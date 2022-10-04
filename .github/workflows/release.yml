@@ -20,7 +20,24 @@ jobs:
       - name: Package source code
         shell: bash
         run: |
-          tar -czvf humid-${{ env.RELEASE_VERSION }}.tar.gz lib/ src/
+          find . \
+          -name '*.h' -o \
+          -name '*.hpp' -o \
+          -name '*.cc' -o \
+          -name '*.tcc' -o \
+          -name '*.cpp' -o \
+          -name '*.c' -o \
+          -name '*.asm' -o \
+          -name '*.S' -o \
+          -name '*.lo' -o \
+          -name '*libisal*' -o \
+          -name '*programs' -o \
+          -name '*autogen.sh' -o \
+          -name '*configure.ac' -o \
+          -name '*nasm-filter.sh' -o \
+          -name 'Makefile' -o \
+          -name 'Makefile.am' \
+          | tar -czvf humid-${{ env.RELEASE_VERSION }}.tar.gz --files-from -
 
       - name: Print event context
         env:
