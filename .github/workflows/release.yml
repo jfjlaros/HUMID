@@ -3,6 +3,7 @@ name: Publish release on tag creation
 on:
   push:
     tags:
+      - '*'
 
 jobs:
   package:
@@ -32,3 +33,18 @@ jobs:
         with:
           name: humid-${{ env.RELEASE_VERSION}}.tar
           path: humid-${{ env.RELEASE_VERSION}}.tar
+
+  release:
+    - name: Create a release out of the archive
+      needs: package
+      runs-on: ubuntu-latest
+      steps:
+        - name: Download package result
+          uses: actions/download-artifact@v3
+          with:
+            name: humid-${{ env.RELEASE_VERSION}}.tar
+
+        - name: Create release
+          run: |
+            gh release create ${{ env.RELEASE_VERSION}} --generate-notes humid-${{ env.RELEASE_VERSION}}.tar
+
