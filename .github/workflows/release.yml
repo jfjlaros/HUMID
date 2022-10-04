@@ -9,18 +9,16 @@ jobs:
     name: Packge source and dependencies
     runs-on: ubuntu-latest
     steps:
-      - name: Package source code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
           submodules: recursive
+
+      - name: Package source code
         shell: bash
         run: |
           tar -czvf humid.tar.gz lib/ src/
 
       - name: Print event context
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
         env:
           EVENT_CONTEXT: ${{ toJSON(github.event) }}
         run: |
