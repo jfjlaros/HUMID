@@ -36,7 +36,7 @@ jobs:
           -name 'configure.ac' -o \
           -name 'nasm-filter.sh' -o \
           -name 'Makefile*' -o \
-          -name 'LICENCE'
+          -name 'LICENCE' \
           | tar -czvf humid-${{ env.RELEASE_VERSION }}.tar.gz --files-from -
 
       - name: Print event context
