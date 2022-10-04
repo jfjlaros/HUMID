@@ -10,18 +10,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Package source code
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
         shell: bash
         run: |
           tar -czvf humid.tar.gz lib/ src/
 
       - name: Print event context
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
         env:
           EVENT_CONTEXT: ${{ toJSON(github.event) }}
         run: |
           echo $EVENT_CONTEXT
 
       - name: Upload archive as artifact
-        users: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3
         with:
           name: humid.tar.gz
           path: humid.tar.gz
