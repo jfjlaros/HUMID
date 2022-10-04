@@ -35,39 +35,39 @@ jobs:
           path: humid-${{ env.RELEASE_VERSION}}.tar.gz
 
   build: Build a static binary
-  runs-on: ubuntu-latest
-  steps:
-    - name: Install build dependencies
-      run: |
-        sudo apt update
-        sudo apt install \
-        g++-11 \
-        libdeflate-dev \
-        libisal-dev \
-        make
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install build dependencies
+        run: |
+          sudo apt update
+          sudo apt install \
+          g++-11 \
+          libdeflate-dev \
+          libisal-dev \
+          make
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 10
 
-    - name: Download tar archive
-      uses: actions/download-artifact@v3
-      with:
-        name: release-tar
+      - name: Download tar archive
+        uses: actions/download-artifact@v3
+        with:
+          name: release-tar
 
-    - name: Unpack archive
-      run: tar -xvf humid-v1.0.13.tar.gz
+      - name: Unpack archive
+        run: tar -xvf humid-v1.0.13.tar.gz
 
-    - name: Configure and build isa-l
-      run: |
-        cd lib/isa-l && ./autogen.sh && ./configure && make
+      - name: Configure and build isa-l
+        run: |
+          cd lib/isa-l && ./autogen.sh && ./configure && make
 
-    - name: Build static binary for humid
-      run: |
-        cd src && make static && mv static humid
+      - name: Build static binary for humid
+        run: |
+          cd src && make static && mv static humid
 
-    - name: Upload static binary as artifact
-      users: actions/upload-artifact@v3
-      with:
-        name: release-binary
-        path: src/humid
+      - name: Upload static binary as artifact
+        users: actions/upload-artifact@v3
+        with:
+          name: release-binary
+          path: src/humid
 
   release:
       name: Create a release out of the tar archive
