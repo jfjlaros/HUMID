@@ -1,0 +1,32 @@
+name: build
+on:
+  push:
+    branches: 
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install \
+            catch \
+            g++-11 \
+            libdeflate-dev \
+            libisal-dev \
+            make \
+            valgrind
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 10
+
+      - name: Test with catch
+        run: |
+          cd tests
+          make check
