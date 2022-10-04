@@ -65,7 +65,7 @@ jobs:
           cd src && make static && mv static humid
 
       - name: Upload static binary as artifact
-        users: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3
         with:
           name: release-binary
           path: src/humid
