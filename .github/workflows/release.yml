@@ -82,7 +82,7 @@ jobs:
 
       - name: Build static binary for humid
         run: |
-          cd src && make static && mv static humid
+          cd src && make humid
 
       - name: Upload static binary as artifact
         uses: actions/upload-artifact@v3
