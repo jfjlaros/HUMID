@@ -2,6 +2,9 @@
 
 #include "../src/fastq.h"
 
+string extractUMI_(string);
+string makeStringSize_(string, size_t, char);
+
 
 TEST_CASE("Extract UMI from header") {
   SECTION("Extract UMI from read pointer") {
@@ -13,31 +16,31 @@ TEST_CASE("Extract UMI from header") {
   }
   SECTION("Extract UMI with underscore") {
     SECTION("No UMI in header") {
-      REQUIRE(_extractUMI("header") == "");
-      REQUIRE(_extractUMI("header with spaces") == "");
-      REQUIRE(_extractUMI("header_with_many_underscores and space") == "");
-      REQUIRE(_extractUMI("header_ignore_lowercase_umi_aatt") == "");
-      REQUIRE(_extractUMI("header space then_underscore") == "");
-      REQUIRE(_extractUMI("header space then_underscore_AATT") == "");
+      REQUIRE(extractUMI_("header") == "");
+      REQUIRE(extractUMI_("header with spaces") == "");
+      REQUIRE(extractUMI_("header_with_many_underscores and space") == "");
+      REQUIRE(extractUMI_("header_ignore_lowercase_umi_aatt") == "");
+      REQUIRE(extractUMI_("header space then_underscore") == "");
+      REQUIRE(extractUMI_("header space then_underscore_AATT") == "");
     }
 
     SECTION("UMI in header") {
-      REQUIRE(_extractUMI("header_AATT") == "AATT");
-      REQUIRE(_extractUMI("header_AATT with spaces") == "AATT");
-      REQUIRE(_extractUMI("header_with_many_underscores_AATT") == "AATT");
-      REQUIRE(_extractUMI("header_with_many_underscores_AATT and space") == "AATT");
+      REQUIRE(extractUMI_("header_AATT") == "AATT");
+      REQUIRE(extractUMI_("header_AATT with spaces") == "AATT");
+      REQUIRE(extractUMI_("header_with_many_underscores_AATT") == "AATT");
+      REQUIRE(extractUMI_("header_with_many_underscores_AATT and space") == "AATT");
     }
   }
 
   SECTION("Extract UMI with colon") {
     SECTION("No UMI in header") {
-      REQUIRE(_extractUMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y more stuf") == "");
+      REQUIRE(extractUMI_("Instrument:RunID:FlowCellID:Lane:Tile:X:Y more stuf") == "");
     }
 
     SECTION("UMI in header") {
-      REQUIRE(_extractUMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG") == "ATCG");
-      REQUIRE(_extractUMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG more stuf") == "ATCG");
-      REQUIRE(_extractUMI("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG more_underscore") == "ATCG");
+      REQUIRE(extractUMI_("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG") == "ATCG");
+      REQUIRE(extractUMI_("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG more stuf") == "ATCG");
+      REQUIRE(extractUMI_("Instrument:RunID:FlowCellID:Lane:Tile:X:Y:ATCG more_underscore") == "ATCG");
     }
   }
 }
@@ -164,11 +167,12 @@ TEST_CASE("Test if a string is a valid UMI") {
     REQUIRE(not validUMI("atcg"));
     REQUIRE(not validUMI("ATCGP"));
     REQUIRE(not validUMI("1234"));
+    REQUIRE(not validUMI("ATCGN"));
   }
 
   SECTION("Valid UMIs") {
     REQUIRE(validUMI("A"));
-    REQUIRE(validUMI("ATCGN"));
+    REQUIRE(validUMI("ATCG"));
   }
 }
 
@@ -187,8 +191,8 @@ TEST_CASE("Test extracting the last field from a string") {
 }
 
 TEST_CASE("Test making a string a given size") {
-  REQUIRE(_makeStringSize("AA", 0, 'N') == "");
-  REQUIRE(_makeStringSize("AA", 1, 'N') == "A");
-  REQUIRE(_makeStringSize("AA", 2, 'N') == "AA");
-  REQUIRE(_makeStringSize("AA", 3, 'N') == "AAN");
+  REQUIRE(makeStringSize_("AA", 0, 'N') == "");
+  REQUIRE(makeStringSize_("AA", 1, 'N') == "A");
+  REQUIRE(makeStringSize_("AA", 2, 'N') == "AA");
+  REQUIRE(makeStringSize_("AA", 3, 'N') == "AAN");
 }

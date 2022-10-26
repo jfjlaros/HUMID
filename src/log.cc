@@ -13,7 +13,7 @@ time_t startMessage(ofstream& log, char const message[]) {
   log << message << "... ";
   log.flush();
 
-  return time(NULL);
+  return time(nullptr);
 }
 
 /*!
@@ -22,8 +22,8 @@ time_t startMessage(ofstream& log, char const message[]) {
  * \param log Log file.
  * \param start Task start time.
  */
-void endMessage(ofstream& log, time_t start) {
-  unsigned int seconds = (unsigned int)difftime(time(NULL), start);
+void endMessage(ofstream& log, time_t const start) {
+  unsigned int seconds = (unsigned int)difftime(time(nullptr), start);
   log << "done. (" << seconds / 60 << 'm' << seconds % 60 << "s)\n";
   log.flush();
 }

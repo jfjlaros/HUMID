@@ -6,8 +6,8 @@ From source
 
 ::
 
-    git clone https://github.com/jfjlaros/dedup.git
-    cd dedup
+    git clone https://github.com/jfjlaros/HUMID.git
+    cd HUMID
     git submodule update --recursive --init
 
 Compilation

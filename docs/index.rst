@@ -8,3 +8,4 @@
    install
    cli
    usage
+   credits

@@ -5,4 +5,4 @@
 using std::ofstream;
 
 time_t startMessage(ofstream&, char const[]);
-void endMessage(ofstream&, time_t);
+void endMessage(ofstream&, time_t const);

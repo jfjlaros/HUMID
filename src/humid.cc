@@ -17,13 +17,13 @@ using std::tie;
 
 /*!
  * Peek at the header of the first read, to determine the size of the UMI, if
- * any
+ * any.
  *
- * \param filename Input file name
+ * \param filename Input file name.
  *
- * \return Size of the UMI in the header
+ * \return Size of the UMI in the header.
  */
-size_t peekUMI(string filename) {
+size_t peekUMI(string const filename) {
   FastqReader* reader = new FastqReader(filename.c_str());
   Read* read = reader->read();
 
@@ -37,14 +37,15 @@ size_t peekUMI(string filename) {
 
 /*!
  * Pre-compute the nucleotides to take from the UMI header, and from each of
- * the input files
+ * the input files.
  */
-tuple<size_t, vector<size_t>> preCompute(vector<string> files, size_t wordLength) {
-  // Peek at the header of the first read in the first file to get the UMI size
+tuple<size_t, vector<size_t>> preCompute(
+    vector<string> const files, size_t const wordLength) {
+  // Peek at the header of the first read in the first file to get the UMI size.
   size_t headerUMISize = peekUMI(files.front());
 
   // Calculate how many nucleotes to take from each read. Any remainder will be
-  // taken from the last file
+  // taken from the last file.
   vector<size_t> ntToTake = ntFromFile(files.size(), wordLength - headerUMISize);
 
   return tuple<size_t, vector<size_t>>(headerUMISize, ntToTake);
@@ -61,19 +62,19 @@ tuple<size_t, vector<size_t>> preCompute(vector<string> files, size_t wordLength
  * \return Total and usable number of reads.
  */
 tuple<size_t, size_t> readData(
-    Trie<4, NLeaf>& trie, vector<string> files, size_t wordLength,
+    Trie<4, NLeaf>& trie, vector<string> const files, size_t const wordLength,
     ofstream& log) {
   time_t start = startMessage(log, "Reading data");
 
   // Pre calculate some values so that we do not have to re-calculate them for
-  // every single read
+  // every single read.
   size_t headerUMISize;
   vector<size_t> ntToTake;
   tie(headerUMISize, ntToTake) = preCompute(files, wordLength);
 
   size_t total = 0;
   size_t usable = 0;
-  for (vector<Read*> reads: readFiles(files)) {
+  for (vector<Read*> const& reads: readFiles(files)) {
     Word word = makeWord(reads, ntToTake, headerUMISize);
     if (not word.filtered) {
       NLeaf* leaf = trie.add(word.data);
@@ -96,11 +97,11 @@ tuple<size_t, size_t> readData(
  * \return Number of unique words.
  */
 size_t findHammingNeighbours(
-    Trie<4, NLeaf>& trie, size_t distance, ofstream& log) {
+    Trie<4, NLeaf> const& trie, size_t const distance, ofstream& log) {
   size_t start = startMessage(log, "Calculating neighbours");
   size_t unique = 0;
-  for (Result<NLeaf> walkResult: trie.walk()) {
-    for (Result<NLeaf> hammingResult: trie.asymmetricHamming(
+  for (Result<NLeaf> const& walkResult: trie.walk()) {
+    for (Result<NLeaf> const& hammingResult: trie.asymmetricHamming(
         walkResult.path, distance)) {
       if (walkResult.leaf != hammingResult.leaf) {
         walkResult.leaf->neighbours.push_back(hammingResult.leaf);
@@ -124,11 +125,11 @@ size_t findHammingNeighbours(
  * \return Number of unique words.
  */
 size_t findEditNeighbours(
-    Trie<4, NLeaf>& trie, size_t distance, ofstream& log) {
+    Trie<4, NLeaf> const& trie, size_t const distance, ofstream& log) {
   size_t start = startMessage(log, "Calculating neighbours");
   size_t unique = 0;
-  for (Result<NLeaf> walkResult: trie.walk()) {
-    for (Result<NLeaf> editResult: trie.asymmetricLevenshtein(
+  for (Result<NLeaf> const& walkResult: trie.walk()) {
+    for (Result<NLeaf> const& editResult: trie.asymmetricLevenshtein(
         walkResult.path, distance)) {
       if (walkResult.leaf != editResult.leaf) {
         walkResult.leaf->neighbours.push_back(editResult.leaf);
@@ -150,7 +151,8 @@ size_t findEditNeighbours(
  *
  * \return Number of clusters.
  */
-vector<Cluster*> findClusters(Trie<4, NLeaf>& trie, bool maximum, ofstream& log) {
+vector<Cluster*> findClusters(
+    Trie<4, NLeaf>& trie, bool const maximum, ofstream& log) {
   size_t start{};
   if (maximum) {
     start = startMessage(log, "Calculating maximum clusters");
@@ -160,7 +162,7 @@ vector<Cluster*> findClusters(Trie<4, NLeaf>& trie, bool maximum, ofstream& log)
   }
   vector<Cluster*> clusters;
   size_t id = 0;
-  for (Result<NLeaf> result: trie.walk()) {
+  for (Result<NLeaf> const& result: trie.walk()) {
     if (not result.leaf->cluster) {
       Cluster* cluster = new Cluster(id++);
       if (maximum) {
@@ -187,23 +189,23 @@ vector<Cluster*> findClusters(Trie<4, NLeaf>& trie, bool maximum, ofstream& log)
  * \param log Log handle.
  */
 void writeFiltered(
-    Trie<4, NLeaf>& trie, vector<string> files, size_t wordLength,
-    string dirName, ofstream& log) {
+    Trie<4, NLeaf> const& trie, vector<string> const files,
+    size_t const wordLength, string const dirName, ofstream& log) {
   size_t start = startMessage(log, "Writing filtered results");
 
   // Pre calculate some values so that we do not have to re-calculate them for
-  // every single read
+  // every single read.
   size_t headerUMISize;
   vector<size_t> ntToTake;
   tie(headerUMISize, ntToTake) = preCompute(files, wordLength);
 
   vector<Writer*> outFiles;
   Options options;
-  for (string name: makeFileNames(files, dirName, "dedup")) {
+  for (string const& name: makeFileNames(files, dirName, "dedup")) {
     outFiles.push_back(new Writer(&options, name, options.compression));
   }
 
-  for (vector<Read*> reads: readFiles(files)) {
+  for (vector<Read*> const& reads: readFiles(files)) {
     Word word = makeWord(reads, ntToTake, headerUMISize);
     if (not word.filtered) {
       Node<4, NLeaf>* node = trie.find(word.data);
@@ -219,7 +221,7 @@ void writeFiltered(
     }
   }
 
-  for (Writer* w: outFiles) {
+  for (Writer* const w: outFiles) {
     delete w;
   }
 
@@ -236,23 +238,23 @@ void writeFiltered(
  * \param log Log handle.
  */
 void writeAnnotated(
-    Trie<4, NLeaf>& trie, vector<string> files, size_t wordLength,
-    string dirName, ofstream& log) {
+    Trie<4, NLeaf> const& trie, vector<string> const files, size_t const
+    wordLength, string const dirName, ofstream& log) {
   size_t start = startMessage(log, "Writing annotated results");
 
   // Pre calculate some values so that we do not have to re-calculate them for
-  // every single read
+  // every single read.
   size_t headerUMISize;
   vector<size_t> ntToTake;
   tie(headerUMISize, ntToTake) = preCompute(files, wordLength);
 
   vector<Writer*> outFiles;
   Options options;
-  for (string name: makeFileNames(files, dirName, "annotated")) {
+  for (string const& name: makeFileNames(files, dirName, "annotated")) {
     outFiles.push_back(new Writer(&options, name, options.compression));
   }
 
-  for (vector<Read*> reads: readFiles(files)) {
+  for (vector<Read*> const& reads: readFiles(files)) {
     Word word = makeWord(reads, ntToTake, headerUMISize);
     if (not word.filtered) {
       Node<4, NLeaf>* node = trie.find(word.data);
@@ -265,7 +267,7 @@ void writeAnnotated(
     }
   }
 
-  for (Writer* w: outFiles) {
+  for (Writer* const w: outFiles) {
     delete w;
   }
 
@@ -281,12 +283,12 @@ void writeAnnotated(
  * \return Duplicate statistics histograms.
  */
 tuple<map<size_t, size_t>, map<size_t, size_t>> runStatistics(
-    Trie<4, NLeaf>& trie, ofstream& log) {
+    Trie<4, NLeaf> const& trie, ofstream& log) {
   size_t start = startMessage(log, "Calculating count and neighbour stats");
 
   map<size_t, size_t> counts;
   map<size_t, size_t> neighbours;
-  for (Result<NLeaf> result: trie.walk()) {
+  for (Result<NLeaf> const& result: trie.walk()) {
     counts[result.leaf->count]++;
     neighbours[result.leaf->neighbours.size()]++;
   }
@@ -309,23 +311,24 @@ tuple<map<size_t, size_t>, map<size_t, size_t>> runStatistics(
  * \param dirName Output directory.
  */
 void writeStatistics(
-    map<size_t, size_t> counts, map<size_t, size_t> neighbours,
-    map<size_t, size_t> clusters, size_t total, size_t usable, size_t unique,
-    size_t clusterSize, string dirName) {
+    map<size_t, size_t> const& counts, map<size_t, size_t> const& neighbours,
+    map<size_t, size_t> const& clusters, size_t const total,
+    size_t const usable, size_t const unique, size_t const clusterSize,
+    string const dirName) {
   ofstream output(addDir("counts.dat", dirName), ios::out | ios::binary);
-  for (pair<size_t, size_t> count: counts) {
+  for (pair<size_t, size_t> const& count: counts) {
     output << count.first << ' ' << count.second << '\n';
   }
   output.close();
 
   output.open(addDir("neigh.dat", dirName), ios::out | ios::binary);
-  for (pair<size_t, size_t> count: neighbours) {
+  for (pair<size_t, size_t> const& count: neighbours) {
     output << count.first << ' ' << count.second << '\n';
   }
   output.close();
 
   output.open(addDir("clusters.dat", dirName), ios::out | ios::binary);
-  for (pair<size_t, size_t> count: clusters) {
+  for (pair<size_t, size_t> const& count: clusters) {
     output << count.first << ' ' << count.second << '\n';
   }
   output.close();
@@ -349,10 +352,11 @@ void writeStatistics(
  * \param write
  * \param files FastQ files.
  */
-void dedup(
-    size_t wordLength, size_t distance, string logName, string dirName,
-    bool runStats, bool filter, bool annotate, bool edit, bool maximum,
-    vector<string> files) {
+void humid(
+    size_t const wordLength, size_t const distance, string const logName,
+    string const dirName, bool const runStats, bool const filter,
+    bool const annotate, bool const edit, bool const maximum,
+    vector<string> const files) {
   Trie<4, NLeaf> trie;
 
   ofstream log(logName.c_str(), ios::out | ios::binary);
@@ -399,7 +403,7 @@ int main(int argc, char* argv[]) {
 
   interface(
     io,
-    dedup, argv[0], "Deduplicate a dataset.", 
+    humid, argv[0], "Deduplicate a dataset.", 
       param("-n", 24, "word length"),
       param("-m", 1, "allowed mismatches"),
       param("-l", "/dev/stderr", "log file name"),
@@ -410,6 +414,4 @@ int main(int argc, char* argv[]) {
       param("-x", false, "use maximum clustering method"),
       param("-e", false, "use edit distance"),
       param("files", "FastQ files"));
-
-  return 0;
 }

@@ -1,5 +1,4 @@
 HUMID -- High-performance UMI Deduplicator
-==================
 
 .. image:: https://img.shields.io/github/last-commit/jfjlaros/HUMID.svg
    :target: https://github.com/jfjlaros/HUMID/graphs/commit-activity

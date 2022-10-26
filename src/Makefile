@@ -1,5 +1,5 @@
-EXEC := dedup
-MAIN := dedup.cc
+EXEC := humid
+MAIN := humid.cc
 LIBS := cluster fastq log ../lib/commandIO/src/error \
   ../lib/commandIO/src/plugins/cli/io ../lib/commandIO/src/plugins/repl/io \
   ../lib/fastp/src/fastqreader ../lib/fastp/src/readpool \

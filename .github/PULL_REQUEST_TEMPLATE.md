@@ -36,5 +36,5 @@ Provide any other important details below.
 
 :question:
 
-[1]: https://github.com/jfjlaros/dedup/pulls
-[2]: https://github.com/jfjlaros/dedup/blob/master/docs/CONTRIBUTING.md#code-style
+[1]: https://github.com/jfjlaros/HUMID/pulls
+[2]: https://github.com/jfjlaros/HUMID/blob/master/docs/CONTRIBUTING.md#code-style
