@@ -1,0 +1,126 @@
+name: Publish release on tag creation
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  package:
+    name: Package source and dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Get shortened version of release tag
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Package source code
+        shell: bash
+        run: |
+          find src lib \
+          -name '*.h' -o \
+          -name '*.hpp' -o \
+          -name '*.cc' -o \
+          -name '*.tcc' -o \
+          -name '*.cpp' -o \
+          -name '*.c' -o \
+          -name '*.asm' -o \
+          -name '*.S' -o \
+          -name '*.lo' -o \
+          -name '*libisal*' -o \
+          -name '*programs' -o \
+          -name 'autogen.sh' -o \
+          -name 'configure.ac' -o \
+          -name 'nasm-filter.sh' -o \
+          -name 'Makefile*' -o \
+          -name 'LICENSE*' \
+          | tar -czvf humid-${{ env.RELEASE_VERSION }}.tar.gz --files-from -
+
+      - name: Print event context
+        env:
+          EVENT_CONTEXT: ${{ toJSON(github.event) }}
+        run: |
+          echo $EVENT_CONTEXT
+
+      - name: Upload archive as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-tar
+          path: humid-${{ env.RELEASE_VERSION}}.tar.gz
+          retention-days: 1
+
+  build:
+    name: Build a static binary
+    runs-on: ubuntu-latest
+    needs: package
+    steps:
+      - name: Install build dependencies
+        run: |
+          sudo apt update
+          sudo apt install \
+          g++-11 \
+          libdeflate-dev \
+          libisal-dev \
+          make \
+          nasm
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 10
+
+      - name: Download tar archive
+        uses: actions/download-artifact@v3
+        with:
+          name: release-tar
+
+      - name: Unpack archive
+        run: tar -xvf humid-*.tar.gz
+
+      - name: Configure and build isa-l
+        run: |
+          cd lib/isa-l && ./autogen.sh && ./configure && make
+
+      - name: Build static binary for humid
+        run: |
+          cd src && make humid
+
+      - name: Upload static binary as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-binary
+          path: src/humid
+          retention-days: 1
+
+  release:
+      name: Create a release out of the tar archive
+      needs:
+        - package
+        - build
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+          with:
+            submodules: recursive
+
+        - name: Get shortened version of release tag
+          run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+        - name: Download release tarball
+          uses: actions/download-artifact@v3
+          with:
+            name: release-tar
+
+        - name: Download release binary
+          uses: actions/download-artifact@v3
+          with:
+            name: release-binary
+
+        - name: Create release
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            gh release create \
+              ${{ env.RELEASE_VERSION}} \
+              --generate-notes \
+              humid-${{ env.RELEASE_VERSION}}.tar.gz \
+              humid

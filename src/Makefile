@@ -20,7 +20,7 @@ OBJS := $(addsuffix .o, $(LIBS))
 
 all: $(EXEC)
 
-static: $(MAIN) $(OBJS)
+humid: $(MAIN) $(OBJS)
 	$(CC) $(CC_ARGS) -o $@ $^ $(LD_ARGS) $(LD_STATIC_ARGS)
 
 $(EXEC): $(MAIN) $(OBJS)
@@ -39,6 +39,6 @@ clean:
 	rm -f $(OBJS)
 
 distclean: clean
-	rm -f $(EXEC) static
+	rm -f $(EXEC) humid
 
 doc: ../docs/cli.rst

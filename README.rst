@@ -1,5 +1,4 @@
-FASTQ HUMIDlicator
-==================
+HUMID -- High-performance UMI Deduplicator
 
 .. image:: https://img.shields.io/github/last-commit/jfjlaros/HUMID.svg
    :target: https://github.com/jfjlaros/HUMID/graphs/commit-activity
@@ -25,4 +24,4 @@ FASTQ HUMIDlicator
 Please see ReadTheDocs_ for the latest documentation.
 
 
-.. _ReadTheDocs: https://HUMID.readthedocs.io
+.. _ReadTheDocs: https://humid.readthedocs.io
