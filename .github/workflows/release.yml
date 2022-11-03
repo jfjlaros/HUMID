@@ -3,7 +3,7 @@ name: Publish release on tag creation
 on:
   push:
     tags:
-      - '*'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   package:
@@ -82,7 +82,7 @@ jobs:
 
       - name: Build static binary for humid
         run: |
-          cd src && make humid
+          cd src && make static && mv static humid
 
       - name: Upload static binary as artifact
         uses: actions/upload-artifact@v3

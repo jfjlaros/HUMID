@@ -28,4 +28,4 @@ Static compilation
     ./configure
     make
     cd ../../src
-    make humid
+    make static
