@@ -3,7 +3,7 @@ name: Publish release on tag creation
 on:
   push:
     tags:
-      - '*'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   package:
