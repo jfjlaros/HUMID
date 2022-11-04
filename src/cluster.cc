@@ -71,7 +71,7 @@ bool atMostHalf_(int a, int b) {
  * \param leaf Leaf node.
  */
 NLeaf* maxNeighbour(NLeaf* leaf) {
-  int i = 0;
+  size_t i = 0;
   while (i < leaf->neighbours.size()) {
     NLeaf* neighbour = leaf->neighbours[i++];
 

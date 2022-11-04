@@ -77,7 +77,7 @@ tuple<size_t, size_t> readData(
   for (vector<Read*> const& reads: readFiles(files)) {
     Word word = makeWord(reads, ntToTake, headerUMISize);
     if (not word.filtered) {
-      NLeaf* leaf = trie.add(word.data);
+      trie.add(word.data);
       usable++;
     }
     total++;
@@ -316,19 +316,19 @@ void writeStatistics(
     size_t const usable, size_t const unique, size_t const clusterSize,
     string const dirName) {
   ofstream output(addDir("counts.dat", dirName), ios::out | ios::binary);
-  for (pair<size_t, size_t> const& count: counts) {
+  for (pair<size_t const, size_t> const& count: counts) {
     output << count.first << ' ' << count.second << '\n';
   }
   output.close();
 
   output.open(addDir("neigh.dat", dirName), ios::out | ios::binary);
-  for (pair<size_t, size_t> const& count: neighbours) {
+  for (pair<size_t const, size_t> const& count: neighbours) {
     output << count.first << ' ' << count.second << '\n';
   }
   output.close();
 
   output.open(addDir("clusters.dat", dirName), ios::out | ios::binary);
-  for (pair<size_t, size_t> const& count: clusters) {
+  for (pair<size_t const, size_t> const& count: clusters) {
     output << count.first << ' ' << count.second << '\n';
   }
   output.close();
