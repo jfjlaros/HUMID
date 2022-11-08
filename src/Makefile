@@ -6,8 +6,10 @@ LIBS := cluster fastq log ../lib/commandIO/src/error \
   ../lib/fastp/src/read ../lib/fastp/src/sequence ../lib/fastp/src/writer \
   ../lib/fastp/src/fastareader ../lib/fastp/src/options
 
+PREFIX ?= /usr/local
+BINDIR ?= $(PREFIX)/bin
 
-CC := g++
+CXX ?= g++
 CC_ARGS := -O2 -fcoroutines -std=c++20
 LD_ARGS := -lisal -ldeflate
 LD_STATIC_ARGS := -L../lib/isa-l/.libs/ -static
@@ -21,16 +23,16 @@ OBJS := $(addsuffix .o, $(LIBS))
 all: $(EXEC)
 
 static: $(MAIN) $(OBJS)
-	$(CC) $(CC_ARGS) -o $@ $^ $(LD_ARGS) $(LD_STATIC_ARGS)
+	$(CXX) $(CC_ARGS) -o $@ $^ $(LD_ARGS) $(LD_STATIC_ARGS)
 
 $(EXEC): $(MAIN) $(OBJS)
-	$(CC) $(CC_ARGS) -o $@ $^ $(LD_ARGS)
+	$(CXX) $(CC_ARGS) -o $@ $^ $(LD_ARGS)
 
 %.o: %.cc
-	$(CC) $(CC_ARGS) -o $@ -c $<
+	$(CXX) $(CC_ARGS) -o $@ -c $<
 
 %.o: %.cpp
-	$(CC) $(CC_ARGS) -o $@ -c $<
+	$(CXX) $(CC_ARGS) -o $@ -c $<
 
 ../docs/cli.rst: ../docs/cli_template.rst $(EXEC)
 	cp $< $@ && ./$(EXEC) -h >> $@
@@ -40,5 +42,8 @@ clean:
 
 distclean: clean
 	rm -f $(EXEC) static
+
+install:
+	install $(EXEC) $(BINDIR)/$(EXEC)
 
 doc: ../docs/cli.rst
