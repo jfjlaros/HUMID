@@ -6,6 +6,8 @@ LIBS := cluster fastq log ../lib/commandIO/src/error \
   ../lib/fastp/src/read ../lib/fastp/src/sequence ../lib/fastp/src/writer \
   ../lib/fastp/src/fastareader ../lib/fastp/src/options
 
+PREFIX ?= /usr/local
+BINDIR ?= $(PREFIX)/bin
 
 CXX ?= g++
 CC_ARGS := -O2 -fcoroutines -std=c++20
@@ -40,5 +42,8 @@ clean:
 
 distclean: clean
 	rm -f $(EXEC) static
+
+install:
+	install $(EXEC) $(BINDIR)/$(EXEC)
 
 doc: ../docs/cli.rst
