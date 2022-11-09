@@ -16,11 +16,11 @@ CC_ARGS := -O2 -std=c++20
 UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Linux)
-	CXX += -fcoroutines
+	CC_ARGS += -fcoroutines
 endif
 
 ifeq ($(UNAME_S),Darwin)
-	CXX += -fcoroutines-ts -D_LIBCPP_DISABLE_AVAILABILITY
+	CC_ARGS += -fcoroutines-ts -D_LIBCPP_DISABLE_AVAILABILITY
 endif
 
 LD_ARGS := -lisal -ldeflate
