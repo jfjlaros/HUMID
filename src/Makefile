@@ -10,7 +10,19 @@ PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
 
 CXX ?= g++
-CC_ARGS := -O2 -fcoroutines -std=c++20
+CC_ARGS := -O2 -std=c++20
+
+# Compatibility for MacOS
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Linux)
+	CXX += -fcoroutines
+endif
+
+ifeq ($(UNAME_S),Darwin)
+	CXX += -fcoroutines-ts
+endif
+
 LD_ARGS := -lisal -ldeflate
 LD_STATIC_ARGS := -L../lib/isa-l/.libs/ -static
 
