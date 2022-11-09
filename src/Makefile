@@ -23,7 +23,7 @@ ifeq ($(UNAME_S),Darwin)
 	CC_ARGS += -fcoroutines-ts -D_LIBCPP_DISABLE_AVAILABILITY
 endif
 
-LD_ARGS := -lisal -ldeflate
+LDFLAGS += -lisal -ldeflate
 LD_STATIC_ARGS := -L../lib/isa-l/.libs/ -static
 
 
@@ -35,10 +35,10 @@ OBJS := $(addsuffix .o, $(LIBS))
 all: $(EXEC)
 
 static: $(MAIN) $(OBJS)
-	$(CXX) $(CC_ARGS) -o $@ $^ $(LD_ARGS) $(LD_STATIC_ARGS)
+	$(CXX) $(CC_ARGS) -o $@ $^ $(LDFLAGS) $(LD_STATIC_ARGS)
 
 $(EXEC): $(MAIN) $(OBJS)
-	$(CXX) $(CC_ARGS) -o $@ $^ $(LD_ARGS)
+	$(CXX) $(CC_ARGS) -o $@ $^ $(LDFLAGS)
 
 %.o: %.cc
 	$(CXX) $(CC_ARGS) -o $@ -c $<
