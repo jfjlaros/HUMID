@@ -20,7 +20,7 @@ ifeq ($(UNAME_S),Linux)
 endif
 
 ifeq ($(UNAME_S),Darwin)
-	CXX += -fcoroutines-ts
+	CXX += -fcoroutines-ts -D_LIBCPP_DISABLE_AVAILABILITY
 endif
 
 LD_ARGS := -lisal -ldeflate
