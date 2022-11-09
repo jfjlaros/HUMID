@@ -1,4 +1,5 @@
 #include <iostream>
+#include <libgen.h>
 #include <map>
 #include <sstream>
 
@@ -181,7 +182,7 @@ string addDir(char const filename[], string const dir) {
  */
 string makeFileName(
     string const filename, string const dir, string const suffix) {
-  string name = basename(filename.c_str());
+  string name = basename((char*)filename.c_str());
   size_t pos = name.find('.');
   string suff = name.substr(0, pos) + '_' + suffix +
     name.substr(pos, string::npos);
