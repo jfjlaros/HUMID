@@ -10,8 +10,20 @@ PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
 
 CXX ?= g++
-CC_ARGS := -O2 -fcoroutines -std=c++20
-LD_ARGS := -lisal -ldeflate
+CC_ARGS := -O2 -std=c++20
+
+# Compatibility for MacOS
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Linux)
+	CC_ARGS += -fcoroutines
+endif
+
+ifeq ($(UNAME_S),Darwin)
+	CC_ARGS += -fcoroutines-ts -D_LIBCPP_DISABLE_AVAILABILITY
+endif
+
+LDFLAGS += -lisal -ldeflate
 LD_STATIC_ARGS := -L../lib/isa-l/.libs/ -static
 
 
@@ -23,10 +35,10 @@ OBJS := $(addsuffix .o, $(LIBS))
 all: $(EXEC)
 
 static: $(MAIN) $(OBJS)
-	$(CXX) $(CC_ARGS) -o $@ $^ $(LD_ARGS) $(LD_STATIC_ARGS)
+	$(CXX) $(CC_ARGS) -o $@ $^ $(LDFLAGS) $(LD_STATIC_ARGS)
 
 $(EXEC): $(MAIN) $(OBJS)
-	$(CXX) $(CC_ARGS) -o $@ $^ $(LD_ARGS)
+	$(CXX) $(CC_ARGS) -o $@ $^ $(LDFLAGS)
 
 %.o: %.cc
 	$(CXX) $(CC_ARGS) -o $@ -c $<

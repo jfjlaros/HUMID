@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "fastq.h"
+#include "../lib/fastp/src/util.h"
 
 using std::cout;
 using std::ios;
@@ -181,7 +182,7 @@ string addDir(char const filename[], string const dir) {
  */
 string makeFileName(
     string const filename, string const dir, string const suffix) {
-  string name = basename(filename.c_str());
+  string name = basename(filename);
   size_t pos = name.find('.');
   string suff = name.substr(0, pos) + '_' + suffix +
     name.substr(pos, string::npos);
