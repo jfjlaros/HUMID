@@ -28,7 +28,7 @@ Installation
 ------------
 You can install HUMID from conda
 
-.. code-blcok:: bash
+.. code-block:: bash
     conda install -c bioconda humid
 
 If you want to, you can also install HUMID `from source <https://humid.readthedocs.io/en/latest/install.html#from-source>`_
