@@ -1,5 +1,3 @@
-HUMID -- High-performance UMI Deduplicator
-
 .. image:: https://img.shields.io/github/last-commit/jfjlaros/HUMID.svg
    :target: https://github.com/jfjlaros/HUMID/graphs/commit-activity
 .. image:: https://github.com/jfjlaros/HUMID/actions/workflows/cpp-library.yml/badge.svg
@@ -21,7 +19,31 @@ HUMID -- High-performance UMI Deduplicator
 
 ----
 
-Please see ReadTheDocs_ for the latest documentation.
+HUMID
+^^^^^
+Quickly and easily remove duplicate reads from FastQ files, with or without UMIs.
 
 
-.. _ReadTheDocs: https://humid.readthedocs.io
+Installation
+------------
+You can install HUMID from conda
+```bash
+conda install -c bioconda humid
+```
+
+If you want to, you can also install HUMID FromSource_.
+
+
+Usage
+-----
+Both the input and output of HUMID are plain FastQ files, so it you can simply
+remove duplicates as a pre-processing step before starting your analysis:
+
+```bash
+humid forward.fastq.gz reverse.fastq.gz
+```
+
+Please see the Usage_ section of the documentation for details.
+
+.. _FromSource: https://humid.readthedocs.io/en/latest/install.html#from-source
+.. _Usage: https://humid.readthedocs.io/en/latest/usage.html
