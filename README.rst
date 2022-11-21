@@ -31,7 +31,7 @@ You can install HUMID from conda
 conda install -c bioconda humid
 ```
 
-If you want to, you can also install HUMID FromSource_.
+If you want to, you can also install HUMID `from source <https://humid.readthedocs.io/en/latest/install.html#from-source>`_
 
 
 Usage
@@ -43,7 +43,4 @@ remove duplicates as a pre-processing step before starting your analysis:
 humid forward.fastq.gz reverse.fastq.gz
 ```
 
-Please see the Usage_ section of the documentation for details.
-
-.. _FromSource: https://humid.readthedocs.io/en/latest/install.html#from-source
-.. _Usage: https://humid.readthedocs.io/en/latest/usage.html
+Please see the `usage<https://humid.readthedocs.io/en/latest/usage.html>`__ section of the documentation for details.
