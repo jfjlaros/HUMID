@@ -31,7 +31,7 @@ You can install HUMID from conda
 
     conda install -c bioconda humid
 
-If you want to, you can also install HUMID `from source <https://humid.readthedocs.io/en/latest/install.html#from-source>`_
+If you want to, you can also install HUMID `from source <https://humid.readthedocs.io/en/latest/install.html#from-source>`_.
 
 
 Usage
