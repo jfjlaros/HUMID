@@ -1,5 +1,6 @@
+=====
 HUMID
-^^^^^
+=====
 
 .. image:: https://img.shields.io/github/last-commit/jfjlaros/HUMID.svg
    :target: https://github.com/jfjlaros/HUMID/graphs/commit-activity
@@ -24,7 +25,8 @@ Quickly and easily remove duplicate reads from FastQ files, with or without UMIs
 
 
 Installation
-------------
+============
+
 You can install HUMID from conda
 
 .. code-block:: bash
@@ -35,12 +37,23 @@ If you want to, you can also install HUMID `from source <https://humid.readthedo
 
 
 Usage
------
+=====
+
 Both the input and output of HUMID are plain FastQ files, so it you can simply
-remove duplicates as a pre-processing step before starting your analysis:
+remove duplicates as a pre-processing step before starting your analysis. If
+your project was sequenced without UMIs, or if the UMIs are present in the
+headers of the FastQ reads (as is done by BCL Convert), you can use the
+following command:
 
 .. code-block:: bash
 
     humid forward.fastq.gz reverse.fastq.gz
 
-Please see the `usage <https://humid.readthedocs.io/en/latest/usage.html>`_ section of the documentation for details.
+
+If the UMIs are located in a separate FastQ file use
+
+.. code-block:: bash
+    humid forward.fastq.gz reverse.fastq.gz umi.fast.gz
+
+
+Please see the `usage <https://humid.readthedocs.io/en/latest/usage.html>`_ section of the documentation for more details.
