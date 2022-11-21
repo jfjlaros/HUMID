@@ -1,6 +1,5 @@
 HUMID
 ^^^^^
-----
 
 .. image:: https://img.shields.io/github/last-commit/jfjlaros/HUMID.svg
    :target: https://github.com/jfjlaros/HUMID/graphs/commit-activity
@@ -20,7 +19,6 @@ HUMID
    :target: https://github.com/jfjlaros/HUMID
 .. image:: https://img.shields.io/github/license/jfjlaros/HUMID.svg
    :target: https://raw.githubusercontent.com/jfjlaros/HUMID/master/LICENSE.md
-----
 
 Quickly and easily remove duplicate reads from FastQ files, with or without UMIs.
 
