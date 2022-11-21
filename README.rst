@@ -27,9 +27,9 @@ Quickly and easily remove duplicate reads from FastQ files, with or without UMIs
 Installation
 ------------
 You can install HUMID from conda
-```bash
-conda install -c bioconda humid
-```
+
+.. code-blcok:: bash
+    conda install -c bioconda humid
 
 If you want to, you can also install HUMID `from source <https://humid.readthedocs.io/en/latest/install.html#from-source>`_
 
