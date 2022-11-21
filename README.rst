@@ -21,7 +21,9 @@ HUMID
 .. image:: https://img.shields.io/github/license/jfjlaros/HUMID.svg
    :target: https://raw.githubusercontent.com/jfjlaros/HUMID/master/LICENSE.md
 
-Quickly and easily remove duplicate reads from FastQ files, with or without UMIs.
+----
+
+HUMID is a tool to quickly and easily remove duplicate reads from FastQ files, with or without UMIs.
 
 
 Installation
@@ -39,11 +41,11 @@ If you want to, you can also install HUMID `from source <https://humid.readthedo
 Usage
 =====
 
-Both the input and output of HUMID are plain FastQ files, so it you can simply
-remove duplicates as a pre-processing step before starting your analysis. If
-your project was sequenced without UMIs, or if the UMIs are present in the
-headers of the FastQ reads (as is done by BCL Convert), you can use the
-following command:
+Both the input and output of HUMID are plain FastQ files, no alignment
+required! This means that you can use HUMID to remove duplicates as a
+pre-processing step before starting your analysis. If your project was
+sequenced without UMIs, or if the UMIs are present in the headers of the FastQ
+reads (as is done by BCL Convert), you can use the following command:
 
 .. code-block:: bash
 
@@ -57,4 +59,10 @@ If the UMIs are located in a separate FastQ file use
     humid forward.fastq.gz reverse.fastq.gz umi.fast.gz
 
 
-Please see the `usage <https://humid.readthedocs.io/en/latest/usage.html>`_ section of the documentation for more details.
+For other use cases, we recommend that you use `fastp
+<https://github.com/OpenGene/fastp#unique-molecular-identifier-umi-processing>`_
+to move the UMIs to the header of the forward FastQ file before deduplicating
+them with HUMID.
+
+Please see the `usage <https://humid.readthedocs.io/en/latest/usage.html>`_
+section of the documentation for more details.
