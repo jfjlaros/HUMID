@@ -53,6 +53,7 @@ following command:
 If the UMIs are located in a separate FastQ file use
 
 .. code-block:: bash
+
     humid forward.fastq.gz reverse.fastq.gz umi.fast.gz
 
 
