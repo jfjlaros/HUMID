@@ -29,6 +29,7 @@ Installation
 You can install HUMID from conda
 
 .. code-block:: bash
+
     conda install -c bioconda humid
 
 If you want to, you can also install HUMID `from source <https://humid.readthedocs.io/en/latest/install.html#from-source>`_
@@ -39,8 +40,8 @@ Usage
 Both the input and output of HUMID are plain FastQ files, so it you can simply
 remove duplicates as a pre-processing step before starting your analysis:
 
-```bash
-humid forward.fastq.gz reverse.fastq.gz
-```
+.. code-block:: bash
+
+    humid forward.fastq.gz reverse.fastq.gz
 
 Please see the `usage <https://humid.readthedocs.io/en/latest/usage.html>`_ section of the documentation for details.
