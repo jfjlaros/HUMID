@@ -43,4 +43,4 @@ remove duplicates as a pre-processing step before starting your analysis:
 humid forward.fastq.gz reverse.fastq.gz
 ```
 
-Please see the `usage<https://humid.readthedocs.io/en/latest/usage.html>`_ section of the documentation for details.
+Please see the `usage <https://humid.readthedocs.io/en/latest/usage.html>`_ section of the documentation for details.
