@@ -27,3 +27,10 @@ void endMessage(ofstream& log, time_t const start) {
   log << "done. (" << seconds / 60 << 'm' << seconds % 60 << "s)\n";
   log.flush();
 }
+
+char const* boolToText(bool const value) {
+  if (value) {
+    return "true";
+  }
+  return "false";
+}
