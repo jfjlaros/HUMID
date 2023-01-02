@@ -348,7 +348,7 @@ void writeMetadata(
   ofstream output(addDir("meta.yml", dirName), ios::out | ios::binary);
 
   output << "name: humid\n" <<
-    "version: 1.0.0\n";
+    "version: 1.0.2\n";
 
   output << "parameters:\n" << 
    "  word_length: " << wordLength << '\n' <<
