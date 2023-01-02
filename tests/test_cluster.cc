@@ -3,8 +3,7 @@
 #include "../src/cluster.h"
 #include "../src/leaf.h"
 
-bool atLeastDouble_(int, int);
-bool atMostHalf_(int, int);
+bool atLeastDouble_(size_t const, size_t const);
 NLeaf* maxNeighbour(NLeaf*);
 
 
@@ -19,12 +18,6 @@ TEST_CASE("Test if a is at least 2x b", "[cluster]") {
   REQUIRE(atLeastDouble_(1, 0));
   REQUIRE(atLeastDouble_(2, 1));
   REQUIRE(not atLeastDouble_(3, 2));
-}
-
-TEST_CASE("Test if a is at most half of b", "[cluster]") {
-  REQUIRE(atMostHalf_(0, 1));
-  REQUIRE(atMostHalf_(1, 2));
-  REQUIRE(not atMostHalf_(2, 3));
 }
 
 TEST_CASE("Test walking a node with no neighbours", "[cluster]") {

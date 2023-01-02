@@ -13,8 +13,8 @@ using std::vector;
  * Word.
  */
 struct Word {
-  vector<uint8_t> data;
-  bool filtered = false;
+  vector<uint8_t> data {};
+  bool filtered {false};
 };
 
 generator<vector<Read*>> readFiles(vector<string> const);

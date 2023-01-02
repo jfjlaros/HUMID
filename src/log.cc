@@ -23,7 +23,7 @@ time_t startMessage(ofstream& log, char const message[]) {
  * \param start Task start time.
  */
 void endMessage(ofstream& log, time_t const start) {
-  unsigned int seconds = (unsigned int)difftime(time(nullptr), start);
+  time_t seconds {static_cast<time_t>(difftime(time(nullptr), start))};
   log << "done. (" << seconds / 60 << 'm' << seconds % 60 << "s)\n";
   log.flush();
 }

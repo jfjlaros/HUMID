@@ -2,12 +2,6 @@
 #include "leaf.h"
 
 
-/*!
- * Constructor.
- */
-Cluster::Cluster(size_t const id) : id(id) {}
-
-
 /*
  * Assign leaf to cluster.
  *
@@ -49,20 +43,12 @@ void assignMaxCluster(NLeaf* leaf, Cluster* cluster) {
 }
 
 /*
- * Determine if a is at least 2b. This is used on the the count difference
+ * Determine if a is at least 2b. This is used on the count difference
  * between a leaf and its neighbour. If this is the case, neighbour will be
  * treated as a PCR-amplified error of leaf.
  */
-bool atLeastDouble_(int a, int b) {
-  return a > 2 * b - 1;
-}
-
-/*
- * The inverse of atLeastDouble_, used to determine if the neighbour is the
- * true sequence, and leaf a PCR error.
- */
-bool atMostHalf_(int a, int b) {
-  return atLeastDouble_(b, a);
+bool atLeastDouble_(size_t const a, size_t const b) {
+  return a >= 2 * b;
 }
 
 /*!
@@ -71,9 +57,9 @@ bool atMostHalf_(int a, int b) {
  * \param leaf Leaf node.
  */
 NLeaf* maxNeighbour(NLeaf* leaf) {
-  size_t i = 0;
+  size_t i {0};
   while (i < leaf->neighbours.size()) {
-    NLeaf* neighbour = leaf->neighbours[i++];
+    NLeaf* neighbour {leaf->neighbours[i++]};
 
     if (not neighbour->cluster and atLeastDouble_(neighbour->count, leaf->count)) {
       // Go to the neighbour and repeat.
@@ -95,7 +81,7 @@ void assignDirectionalCluster_(NLeaf* leaf, Cluster* cluster) {
   for (NLeaf* const neighbour: leaf->neighbours) {
     // If we encounter a neighbour that is unassigned, at most half leaf's
     // size, we recursively add it to cluster.
-    if (not neighbour->cluster and atMostHalf_(neighbour->count, leaf->count)) {
+    if (not neighbour->cluster and atLeastDouble_(leaf->count, neighbour->count)) {
       // If the neighbour has less than half of the number of reads, the
       // neighbour belongs to the current cluster.
       assignDirectionalCluster_(neighbour, cluster);
@@ -113,7 +99,7 @@ void assignDirectionalCluster_(NLeaf* leaf, Cluster* cluster) {
  * \param cluster Cluster.
  */
 void assignDirectionalCluster(NLeaf* leaf, Cluster* cluster) {
-  NLeaf* node = maxNeighbour(leaf);
+  NLeaf* node {maxNeighbour(leaf)};
   // Update the maxCount for the cluster using the max node (only once).
   updateMaxCount_(node, cluster);
   assignDirectionalCluster_(node, cluster);

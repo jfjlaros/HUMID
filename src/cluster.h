@@ -12,13 +12,11 @@ using std::vector;
  * Cluster structure.
  */
 struct Cluster {
-  size_t const id;
-  size_t maxCount = 0;
-  struct NLeaf* maxLeaf = nullptr;
-  size_t size = 0;
-  bool visited = false;
-
-  Cluster(size_t const);
+  size_t id;
+  size_t maxCount {0};
+  struct NLeaf* maxLeaf {nullptr};
+  size_t size {0};
+  bool visited {false};
 };
 
 void assignMaxCluster(NLeaf*, Cluster* const);
