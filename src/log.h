@@ -22,8 +22,3 @@ time_t startMessage(ofstream&, char const[]);
  * \param start Task start time.
  */
 void endMessage(ofstream&, time_t const);
-
-/*!
- * \param value
- */
-char const* boolToText(bool const);

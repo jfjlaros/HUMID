@@ -332,41 +332,11 @@ void writeStatistics(
   }
   output.close();
 
-  output.open(addDir("stats.yml", dirName), ios::out | ios::binary);
+  output.open(addDir("stats.dat", dirName), ios::out | ios::binary);
   output << "total: " << total << '\n';
   output << "usable: " << usable << '\n';
   output << "unique: " << unique << '\n';
   output << "clusters: " << clusterSize << '\n';
-  output.close();
-}
-
-void writeMetadata(
-    size_t const wordLength, size_t const distance, string const& logName,
-    string const& dirName, bool const runStats, bool const filter,
-    bool const annotate, bool const edit, bool const maximum, bool const meta,
-    vector<string> const& files) {
-  ofstream output(addDir("meta.yml", dirName), ios::out | ios::binary);
-
-  output << "name: humid\n" <<
-    "version: 1.0.2\n";
-
-  output << "parameters:\n" << 
-   "  word_length: " << wordLength << '\n' <<
-   "  allowed_mismatches: " << distance << '\n' <<
-   "  log_name: " << logName << '\n' <<
-   "  dir_name: " << dirName << '\n' <<
-   "  run_statistics: " << boolToText(runStats) << '\n' <<
-   "  filter_duplicates: " << boolToText(filter) << '\n' <<
-   "  annotate_fastq_files: " << boolToText(annotate) << '\n' <<
-   "  use_edit_distance: " << boolToText(edit) << '\n' <<
-   "  use_maximum_clustering: " << boolToText(maximum) << '\n' <<
-   "  write_metadata: " << boolToText(meta) << '\n';
-
-  output << "  files:\n";
-  for (string const& file: files) {
-    output << "    - " << file << '\n';
-  }
-
   output.close();
 }
 
@@ -384,7 +354,7 @@ void writeMetadata(
 void humid(
     size_t const wordLength, size_t const distance, string const logName,
     string const dirName, bool const runStats, bool const filter,
-    bool const annotate, bool const edit, bool const maximum, bool const meta,
+    bool const annotate, bool const edit, bool const maximum,
     vector<string> const files) {
   Trie<4, NLeaf> trie;
 
@@ -417,11 +387,6 @@ void humid(
       get<0>(stats), get<1>(stats), cStats, get<0>(input), get<1>(input),
       unique, clusters.size(), dirName);
   }
-  if (meta) {
-    writeMetadata(
-      wordLength, distance, logName, dirName, runStats, filter, annotate, edit,
-      maximum, meta, files);
-  }
 
   log.close();
 
@@ -447,6 +412,5 @@ int main(int argc, char* argv[]) {
       param("-a", false, "write annotated FastQ files"),
       param("-x", false, "use maximum clustering method"),
       param("-e", false, "use edit distance"),
-      param("-w", false, "write metadata"),
       param("files", "FastQ files"));
 }
