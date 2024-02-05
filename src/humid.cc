@@ -98,7 +98,7 @@ tuple<size_t, size_t> readData(
  */
 size_t findHammingNeighbours(
     Trie<4, NLeaf> const& trie, size_t const distance, ofstream& log) {
-  size_t start = startMessage(log, "Calculating neighbours");
+  size_t start = startMessage(log, "Calculating neighbours using Hamming distance");
   size_t unique = 0;
   for (Result<NLeaf> const& walkResult: trie.walk()) {
     for (Result<NLeaf> const& hammingResult: trie.asymmetricHamming(
@@ -126,7 +126,7 @@ size_t findHammingNeighbours(
  */
 size_t findEditNeighbours(
     Trie<4, NLeaf> const& trie, size_t const distance, ofstream& log) {
-  size_t start = startMessage(log, "Calculating neighbours");
+  size_t start = startMessage(log, "Calculating neighbours using Levenshtein distance");
   size_t unique = 0;
   for (Result<NLeaf> const& walkResult: trie.walk()) {
     for (Result<NLeaf> const& editResult: trie.asymmetricLevenshtein(
