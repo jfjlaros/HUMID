@@ -3,9 +3,8 @@
 #include "../src/cluster.h"
 #include "../src/leaf.h"
 
-bool atLeastDouble_(int, int);
-bool atMostHalf_(int, int);
-NLeaf* maxNeighbour(NLeaf*);
+bool atLeastDouble_(size_t const, size_t const);
+NLeaf* maxNeighbour_(NLeaf*);
 
 
 // Helper function to link nodes
@@ -21,17 +20,11 @@ TEST_CASE("Test if a is at least 2x b", "[cluster]") {
   REQUIRE(not atLeastDouble_(3, 2));
 }
 
-TEST_CASE("Test if a is at most half of b", "[cluster]") {
-  REQUIRE(atMostHalf_(0, 1));
-  REQUIRE(atMostHalf_(1, 2));
-  REQUIRE(not atMostHalf_(2, 3));
-}
-
 TEST_CASE("Test walking a node with no neighbours", "[cluster]") {
   // Create a node that is all alone
   NLeaf alone;
   //A leaf with no neighbours should return itself
-  REQUIRE(maxNeighbour(&alone) == &alone);
+  REQUIRE(maxNeighbour_(&alone) == &alone);
 }
 
 TEST_CASE("Test walking node whose neighbour is already assigned", "[cluster]") {
@@ -46,7 +39,7 @@ TEST_CASE("Test walking node whose neighbour is already assigned", "[cluster]") 
   assigned_neighbour.count = 2;
 
   link(&leaf, &assigned_neighbour);
-  REQUIRE(maxNeighbour(&leaf) == &leaf);
+  REQUIRE(maxNeighbour_(&leaf) == &leaf);
 }
 
 TEST_CASE("Test walking a chain of nodes", "[cluster]") {
@@ -59,13 +52,13 @@ TEST_CASE("Test walking a chain of nodes", "[cluster]") {
   free_neighbour.count = 2;
 
   link(&leaf, &free_neighbour);
-  REQUIRE(maxNeighbour(&leaf) == &free_neighbour);
+  REQUIRE(maxNeighbour_(&leaf) == &free_neighbour);
 
   //Lets test a third, further neighbour
   NLeaf third_neighbour;
   third_neighbour.count = 4;
   link(&free_neighbour, &third_neighbour);
-  REQUIRE(maxNeighbour(&leaf) == &third_neighbour);
+  REQUIRE(maxNeighbour_(&leaf) == &third_neighbour);
 
   //Add one more neighbour, that is not high enough to add
   NLeaf last_one;
@@ -74,7 +67,7 @@ TEST_CASE("Test walking a chain of nodes", "[cluster]") {
 
   // Check that the last neighbour was not added, since it was not high
   // enough
-  REQUIRE(maxNeighbour(&leaf) == &third_neighbour);
+  REQUIRE(maxNeighbour_(&leaf) == &third_neighbour);
 }
 
 TEST_CASE("Test assigning to cluster", "[cluster]") {

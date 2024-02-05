@@ -24,13 +24,12 @@ using std::tie;
  * \return Size of the UMI in the header.
  */
 size_t peekUMI(string const filename) {
-  FastqReader* reader = new FastqReader(filename.c_str());
-  Read* read = reader->read();
+  FastqReader reader {filename.c_str()};
+  Read* read {reader.read()};
 
-  size_t umiSize = extractUMI(read).size();
+  size_t umiSize {extractUMI(read).size()};
 
   delete read;
-  delete reader;
 
   return umiSize;
 }
@@ -42,11 +41,11 @@ size_t peekUMI(string const filename) {
 tuple<size_t, vector<size_t>> preCompute(
     vector<string> const files, size_t const wordLength) {
   // Peek at the header of the first read in the first file to get the UMI size.
-  size_t headerUMISize = peekUMI(files.front());
+  size_t headerUMISize {peekUMI(files.front())};
 
   // Calculate how many nucleotes to take from each read. Any remainder will be
   // taken from the last file.
-  vector<size_t> ntToTake = ntFromFile(files.size(), wordLength - headerUMISize);
+  vector<size_t> ntToTake {ntFromFile(files.size(), wordLength - headerUMISize)};
 
   return tuple<size_t, vector<size_t>>(headerUMISize, ntToTake);
 }
@@ -64,7 +63,7 @@ tuple<size_t, vector<size_t>> preCompute(
 tuple<size_t, size_t> readData(
     Trie<4, NLeaf>& trie, vector<string> const files, size_t const wordLength,
     ofstream& log) {
-  time_t start = startMessage(log, "Reading data");
+  time_t start {startMessage(log, "Reading data")};
 
   // Pre calculate some values so that we do not have to re-calculate them for
   // every single read.
@@ -72,10 +71,10 @@ tuple<size_t, size_t> readData(
   vector<size_t> ntToTake;
   tie(headerUMISize, ntToTake) = preCompute(files, wordLength);
 
-  size_t total = 0;
-  size_t usable = 0;
+  size_t total {0};
+  size_t usable {0};
   for (vector<Read*> const& reads: readFiles(files)) {
-    Word word = makeWord(reads, ntToTake, headerUMISize);
+    Word word {makeWord(reads, ntToTake, headerUMISize)};
     if (not word.filtered) {
       trie.add(word.data);
       usable++;
@@ -128,6 +127,7 @@ size_t findEditNeighbours(
     Trie<4, NLeaf> const& trie, size_t const distance, ofstream& log) {
   size_t start = startMessage(log, "Calculating neighbours using Levenshtein distance");
   size_t unique = 0;
+
   for (Result<NLeaf> const& walkResult: trie.walk()) {
     for (Result<NLeaf> const& editResult: trie.asymmetricLevenshtein(
         walkResult.path, distance)) {
@@ -153,7 +153,7 @@ size_t findEditNeighbours(
  */
 vector<Cluster*> findClusters(
     Trie<4, NLeaf>& trie, bool const maximum, ofstream& log) {
-  size_t start{};
+  time_t start{};
   if (maximum) {
     start = startMessage(log, "Calculating maximum clusters");
   }
@@ -161,10 +161,10 @@ vector<Cluster*> findClusters(
     start = startMessage(log, "Calculating directional clusters");
   }
   vector<Cluster*> clusters;
-  size_t id = 0;
+  size_t id {0};
   for (Result<NLeaf> const& result: trie.walk()) {
     if (not result.leaf->cluster) {
-      Cluster* cluster = new Cluster(id++);
+      Cluster* cluster {new Cluster(id++)};
       if (maximum) {
         assignMaxCluster(result.leaf, cluster);
       }
@@ -191,7 +191,7 @@ vector<Cluster*> findClusters(
 void writeFiltered(
     Trie<4, NLeaf> const& trie, vector<string> const files,
     size_t const wordLength, string const dirName, ofstream& log) {
-  size_t start = startMessage(log, "Writing filtered results");
+  time_t start {startMessage(log, "Writing filtered results")};
 
   // Pre calculate some values so that we do not have to re-calculate them for
   // every single read.
@@ -206,14 +206,14 @@ void writeFiltered(
   }
 
   for (vector<Read*> const& reads: readFiles(files)) {
-    Word word = makeWord(reads, ntToTake, headerUMISize);
+    Word word {makeWord(reads, ntToTake, headerUMISize)};
     if (not word.filtered) {
-      Node<4, NLeaf>* node = trie.find(word.data);
+      Node<4, NLeaf>* node {trie.find(word.data)};
       if (
           !node->leaf->cluster->visited &&
           node->leaf->cluster->maxLeaf == node->leaf) {
-        for (size_t i = 0; i < reads.size(); i++) {
-          string s = reads[i]->toString();
+        for (size_t i {0}; i < reads.size(); i++) {
+          string s {reads[i]->toString()};
           outFiles[i]->write(s.c_str(), s.size());
         }
         node->leaf->cluster->visited = true;
@@ -240,7 +240,7 @@ void writeFiltered(
 void writeAnnotated(
     Trie<4, NLeaf> const& trie, vector<string> const files, size_t const
     wordLength, string const dirName, ofstream& log) {
-  size_t start = startMessage(log, "Writing annotated results");
+  time_t start {startMessage(log, "Writing annotated results")};
 
   // Pre calculate some values so that we do not have to re-calculate them for
   // every single read.
@@ -255,13 +255,13 @@ void writeAnnotated(
   }
 
   for (vector<Read*> const& reads: readFiles(files)) {
-    Word word = makeWord(reads, ntToTake, headerUMISize);
+    Word word {makeWord(reads, ntToTake, headerUMISize)};
     if (not word.filtered) {
-      Node<4, NLeaf>* node = trie.find(word.data);
+      Node<4, NLeaf>* node {trie.find(word.data)};
 
-      for (size_t i = 0; i < reads.size(); i++) {
+      for (size_t i {0}; i < reads.size(); i++) {
         *reads[i]->mName += ':' + to_string(node->leaf->cluster->id);
-        string s = reads[i]->toString();
+        string s {reads[i]->toString()};
         outFiles[i]->write(s.c_str(), s.size());
       }
     }
@@ -284,7 +284,7 @@ void writeAnnotated(
  */
 tuple<map<size_t, size_t>, map<size_t, size_t>> runStatistics(
     Trie<4, NLeaf> const& trie, ofstream& log) {
-  size_t start = startMessage(log, "Calculating count and neighbour stats");
+  time_t start {startMessage(log, "Calculating count and neighbour stats")};
 
   map<size_t, size_t> counts;
   map<size_t, size_t> neighbours;
@@ -361,7 +361,7 @@ void humid(
 
   ofstream log(logName.c_str(), ios::out | ios::binary);
 
-  tuple<size_t, size_t> input = readData(trie, files, wordLength, log);
+  tuple<size_t, size_t> input {readData(trie, files, wordLength, log)};
 
   size_t unique;
   if (edit) {
@@ -371,7 +371,7 @@ void humid(
     unique = findHammingNeighbours(trie, distance, log);
   }
 
-  vector<Cluster*> clusters = findClusters(trie, maximum, log);
+  vector<Cluster*> clusters {findClusters(trie, maximum, log)};
 
   create_directories(dirName);
   if (filter) {
@@ -381,9 +381,9 @@ void humid(
     writeAnnotated(trie, files, wordLength, dirName, log);
   }
   if (runStats) {
-    tuple<map<size_t, size_t>, map<size_t, size_t>> stats = runStatistics(
-      trie, log);
-    map<size_t, size_t> cStats = clusterStats(clusters);
+    tuple<map<size_t, size_t>, map<size_t, size_t>> stats {runStatistics(
+      trie, log)};
+    map<size_t, size_t> cStats {clusterStats(clusters)};
     writeStatistics(
       get<0>(stats), get<1>(stats), cStats, get<0>(input), get<1>(input),
       unique, clusters.size(), dirName);

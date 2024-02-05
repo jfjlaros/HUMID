@@ -6,6 +6,6 @@
  * Leaf structure for neighbour finding.
  */
 struct NLeaf : Leaf {
-  vector<NLeaf*> neighbours;
-  Cluster* cluster = nullptr;
+  vector<NLeaf*> neighbours {};
+  Cluster* cluster {nullptr};
 };
