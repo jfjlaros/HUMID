@@ -411,7 +411,7 @@ int main(int argc, char* argv[]) {
       param("-s", false, "calculate statistics"),
       param("-q", true, "write deduplicated FastQ files"),
       param("-a", false, "write annotated FastQ files"),
-      param("-x", false, "use maximum clustering method"),
       param("-e", false, "use edit distance"),
+      param("-x", false, "use maximum clustering method"),
       param("files", "FastQ files"));
 }
