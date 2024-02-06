@@ -97,7 +97,7 @@ tuple<size_t, size_t> readData(
  */
 size_t findHammingNeighbours(
     Trie<4, NLeaf> const& trie, size_t const distance, ofstream& log) {
-  time_t start {startMessage(log, "Calculating neighbours")};
+  time_t start {startMessage(log, "Calculating neighbours using Hamming distance")};
   size_t unique {0};
   for (Result<NLeaf> const& walkResult: trie.walk()) {
     for (Result<NLeaf> const& hammingResult: trie.asymmetricHamming(
@@ -125,8 +125,9 @@ size_t findHammingNeighbours(
  */
 size_t findEditNeighbours(
     Trie<4, NLeaf> const& trie, size_t const distance, ofstream& log) {
-  time_t start {startMessage(log, "Calculating neighbours")};
+  time_t start {startMessage(log, "Calculating neighbours using Levenshtein distance")};
   size_t unique {0};
+
   for (Result<NLeaf> const& walkResult: trie.walk()) {
     for (Result<NLeaf> const& editResult: trie.asymmetricLevenshtein(
         walkResult.path, distance)) {
@@ -410,7 +411,7 @@ int main(int argc, char* argv[]) {
       param("-s", false, "calculate statistics"),
       param("-q", true, "write deduplicated FastQ files"),
       param("-a", false, "write annotated FastQ files"),
-      param("-x", false, "use maximum clustering method"),
       param("-e", false, "use edit distance"),
+      param("-x", false, "use maximum clustering method"),
       param("files", "FastQ files"));
 }
