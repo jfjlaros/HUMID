@@ -158,7 +158,7 @@ vector<Cluster*> findClusters(
   size_t id {0};
   for (Result<NLeaf> const& result: trie.walk()) {
     if (not result.leaf->cluster) {
-      Cluster* cluster {new Cluster(id++)};
+      Cluster* cluster {new Cluster {id++}};
       if (maximum) {
         assignMaxCluster(result.leaf, cluster);
       }
