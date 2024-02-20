@@ -11,9 +11,7 @@ using std::map;
 
 map<char const, uint8_t const> nuc {{'A', 0}, {'C', 1}, {'G', 2}, {'T', 3}};
 
-/*
- * Read vector.
- */
+/* Read vector. */
 struct ReadVector_ {
   void free() const;
 
@@ -22,9 +20,7 @@ struct ReadVector_ {
 };
 
 
-/*
- * Destroy a ReadVector.
- */
+/* Destroy a ReadVector. */
 void ReadVector_::free() const {
   for (Read* const read: reads) {
     delete read;
@@ -32,8 +28,7 @@ void ReadVector_::free() const {
 }
 
 
-/*
- * Read one FastQ record from multiple files.
+/* Read one FastQ record from multiple files.
  *
  * \param readers FastQ readers.
  *
@@ -51,8 +46,7 @@ ReadVector_ readFastq_(vector<FastqReader*> const& readers) {
   return readVector;
 }
 
-/*
- * Make string s the specified size, by either cutting it, or padding it.
+/* Make string s the specified size, by either cutting it, or padding it.
  *
  * \param s String to make a certain size.
  * \param size Size the specified string should be.
@@ -71,8 +65,7 @@ string makeStringSize_(string s, size_t const size, char const padding) {
   return s.append(size - s.size(), padding);
 }
 
-/*
- * Extract UMI from a header.
+/* Extract UMI from a header.
  *
  * \param header Fastq header line.
  */

@@ -15,8 +15,7 @@ using std::filesystem::create_directories;
 using std::ios;
 using std::tie;
 
-/*!
- * Peek at the header of the first read, to determine the size of the UMI, if
+/*! Peek at the header of the first read, to determine the size of the UMI, if
  * any.
  *
  * \param filename Input file name.
@@ -34,8 +33,7 @@ size_t peekUMI(string const filename) {
   return umiSize;
 }
 
-/*!
- * Pre-compute the nucleotides to take from the UMI header, and from each of
+/*! Pre-compute the nucleotides to take from the UMI header, and from each of
  * the input files.
  */
 tuple<size_t, vector<size_t>> preCompute(
@@ -50,8 +48,7 @@ tuple<size_t, vector<size_t>> preCompute(
   return tuple<size_t, vector<size_t>>(headerUMISize, ntToTake);
 }
 
-/*!
- * Populate a trie with words extracted from FastQ files.
+/*! Populate a trie with words extracted from FastQ files.
  *
  * \param trie Trie.
  * \param files Input file names.
@@ -86,8 +83,7 @@ tuple<size_t, size_t> readData(
   return tuple<size_t, size_t>(total, usable);
 }
 
-/*!
- * Calculate neighbours for every word in a trie.
+/*! Calculate neighbours for every word in a trie.
  *
  * \param trie Trie.
  * \param distance Maximum neighbour distance.
@@ -114,8 +110,7 @@ size_t findHammingNeighbours(
   return unique;
 }
 
-/*!
- * Calculate neighbours for every word in a trie.
+/*! Calculate neighbours for every word in a trie.
  *
  * \param trie Trie.
  * \param distance Maximum neighbour distance.
@@ -143,8 +138,7 @@ size_t findEditNeighbours(
   return unique;
 }
 
-/*!
- * Group neighbours into clusters.
+/*! Group neighbours into clusters.
  *
  * \param trie Trie.
  * \param log Log handle.
@@ -179,8 +173,7 @@ vector<Cluster*> findClusters(
   return clusters;
 }
 
-/*!
- * Filter FastQ files for duplicates.
+/*! Filter FastQ files for duplicates.
  *
  * \param trie Trie.
  * \param files Input file names.
@@ -228,8 +221,7 @@ void writeFiltered(
   endMessage(log, start);
 }
 
-/*!
- * Annotate FastQ files with cluster IDs.
+/*! Annotate FastQ files with cluster IDs.
  *
  * \param trie Trie.
  * \param files Input file names.
@@ -274,8 +266,7 @@ void writeAnnotated(
   endMessage(log, start);
 }
 
-/*!
- * Make histograms of the number of perfect and nonperfect duplicates.
+/*! Make histograms of the number of perfect and nonperfect duplicates.
  *
  * \param trie Trie.
  * \param log Log handle.
@@ -298,8 +289,7 @@ tuple<map<size_t, size_t>, map<size_t, size_t>> runStatistics(
     counts, neighbours);
 }
 
-/*!
- * Write statistics to files.
+/*! Write statistics to files.
  *
  * \param counts Perfect duplicate histogram.
  * \param neighbours Nonperfect duplicate histogram.
@@ -341,8 +331,7 @@ void writeStatistics(
   output.close();
 }
 
-/*!
- * Determine duplicates.
+/*! Determine duplicates.
  *
  * \param wordLength Read length.
  * \param distance Maximum distance between reads.
@@ -395,15 +384,13 @@ void humid(
 }
 
 
-/*
- * Argument parsing.
- */
+/* Argument parsing. */
 int main(int argc, char* argv[]) {
   CliIO io(argc, argv);
 
   interface(
     io,
-    humid, argv[0], "Deduplicate a dataset.", 
+    humid, argv[0], "Deduplicate a dataset.",
       param("-n", 24, "word length"),
       param("-m", 1, "allowed mismatches"),
       param("-l", "/dev/stderr", "log file name"),

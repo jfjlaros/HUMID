@@ -2,8 +2,7 @@
 #include "leaf.h"
 
 
-/*
- * Assign leaf to cluster.
+/* Assign leaf to cluster.
  *
  * \param leaf Leaf node.
  * \param cluster Cluster.
@@ -13,8 +12,7 @@ void assignLeaf_(NLeaf* leaf, Cluster* const cluster) {
   leaf->cluster->size += leaf->count;
 }
 
-/*
- * Update the counts for cluster.
+/* Update the counts for cluster.
  *
  * \param leaf Leaf node.
  * \param cluster Cluster.
@@ -26,8 +24,7 @@ void updateMaxCount_(NLeaf* const leaf, Cluster* cluster) {
   }
 }
 
-/*
- * Determine if a is at least 2b. This is used on the count difference
+/* Determine if a is at least 2b. This is used on the count difference
  * between a leaf and its neighbour. If this is the case, neighbour will be
  * treated as a PCR-amplified error of leaf.
  */
@@ -35,8 +32,7 @@ bool atLeastDouble_(size_t const a, size_t const b) {
   return a >= 2 * b;
 }
 
-/*
- * Traverse neigbhours until a local maximum is reached.
+/* Traverse neigbhours until a local maximum is reached.
  *
  * \param leaf Leaf node.
  */
@@ -54,8 +50,7 @@ NLeaf* maxNeighbour_(NLeaf* leaf) {
   return leaf;
 }
 
-/*
- * Internal function to traverse neighbours to assign cluster ID.
+/* Internal function to traverse neighbours to assign cluster ID.
  *
  * \param leaf Leaf node.
  * \param cluster Cluster.

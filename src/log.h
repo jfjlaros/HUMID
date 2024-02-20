@@ -5,8 +5,7 @@
 using std::ofstream;
 
 
-/*!
- * Write a task start message to a log.
+/*! Write a task start message to a log.
  *
  * \param log Log file.
  * \param message Message.
@@ -15,8 +14,7 @@ using std::ofstream;
  */
 time_t startMessage(ofstream&, char const[]);
 
-/*!
- * Write a task end message to a log.
+/*! Write a task end message to a log.
  *
  * \param log Log file.
  * \param start Task start time.
