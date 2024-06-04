@@ -45,11 +45,17 @@ tuple<size_t, vector<size_t>> preCompute(
   // Ensure we do not take negative nucleotides from the files
   size_t fromFile = 0;
   if (wordLength > headerUMISize) {
-    size_t fromFile = wordLength - headerUMISize;
+    fromFile = wordLength - headerUMISize;
   }
+
   // Calculate how many nucleotes to take from each read. Any remainder will be
   // taken from the last file.
   vector<size_t> ntToTake {ntFromFile(files.size(), fromFile)};
+
+  // Ensure we do not take more than wordLength from the UMI header
+  if (wordLength < headerUMISize) {
+    headerUMISize = wordLength;
+  }
 
   return tuple<size_t, vector<size_t>>(headerUMISize, ntToTake);
 }
