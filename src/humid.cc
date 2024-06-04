@@ -83,7 +83,7 @@ tuple<size_t, size_t> readData(
   endMessage(log, nt_start);
 
   // Print the nucleotides to take from UMI and each file
-  string msg = std::format("umi: {}", headerUMISize);
+  string msg = std::format("header: {}", headerUMISize);
   size_t i {1};
   for (size_t nt: ntToTake) {
     msg += std::format("\nfile{}: {}", i, nt);
