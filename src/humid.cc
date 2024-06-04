@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <string>
 #include <tuple>
+#include <format>
 
 #include "../lib/commandIO/src/commandIO.h"
 #include "../lib/fastp/src/writer.h"
@@ -71,6 +72,18 @@ tuple<size_t, size_t> readData(
   size_t headerUMISize;
   vector<size_t> ntToTake;
   tie(headerUMISize, ntToTake) = preCompute(files, wordLength);
+
+  time_t nt_start {startMessage(log, "Determing nucleotides to take")};
+  endMessage(log, nt_start);
+
+  // Print the nucleotides to take from UMI and each file
+  string msg = std::format("umi: {}", headerUMISize);
+  size_t i {1};
+  for (size_t nt: ntToTake) {
+    msg += std::format("\nfile{}: {}", i, nt);
+    i++;
+  }
+  log << msg.c_str() << "\n";
 
   time_t start {startMessage(log, "Reading data")};
   size_t total {0};
