@@ -1,6 +1,16 @@
 Installation
 ============
 
+You can download a static binary directly from _github, or use any of the
+alternative installation methods listed below
+
+From conda_
+-----------
+
+::
+
+    conda install humid
+
 From source
 -----------
 
@@ -29,3 +39,6 @@ Static compilation
     make
     cd ../../src
     make static
+
+.. _conda: https://anaconda.org/bioconda/humid
+.. _github: https://github.com/jfjlaros/HUMID/releases
