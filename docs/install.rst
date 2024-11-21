@@ -1,8 +1,9 @@
 Installation
 ============
 
-You can download a static binary directly from _github, or use any of the
+You can download a static binary directly from github_, or use any of the
 alternative installation methods listed below
+
 
 From conda_
 -----------
