@@ -1,6 +1,4 @@
 #include <filesystem>
-#include <format>
-#include <string>
 #include <tuple>
 
 #include "../lib/commandIO/src/commandIO.h"
@@ -13,7 +11,6 @@
 #include "log.h"
 
 using std::filesystem::create_directories;
-using std::format;
 using std::ios;
 using std::tie;
 
@@ -83,13 +80,11 @@ tuple<size_t, size_t> readData(
   time_t nt_start {startMessage(log, "Determing nucleotides to take")};
   endMessage(log, nt_start);
 
-  // Print the nucleotides to take from UMI and each file.
-  string msg = format("header: {}", headerUMISize);
-  size_t i {1};
-  for (size_t nt: ntToTake) {
-    msg += format("\nfile{}: {}", i++, nt);
+  log << "  header: " << headerUMISize;
+  for (size_t i {0}; i < ntToTake.size(); ++i) {
+    log << "\n  " << files[i] << ": " << ntToTake[i];
   }
-  log << msg.c_str() << "\n";
+  log << "\n";
 
   time_t start {startMessage(log, "Reading data")};
   size_t total {0};
