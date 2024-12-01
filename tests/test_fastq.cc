@@ -110,46 +110,46 @@ TEST_CASE("Test padding) when fetching more than header UMI length") {
 }
 
 TEST_CASE("Test dividing nucleotides over files") {
-  // Vector for the expected result
+  // Vector for the expected result.
   vector<size_t> expected;
 
-  //1 file, 10 nt
+  //1 file, 10 nt.
   expected = { 10 };
   REQUIRE(ntFromFile(1, 10) == expected);
 
-  //3 files, 1 nt
+  //3 files, 1 nt.
   expected = { 0, 0, 1 };
   REQUIRE(ntFromFile(3, 1) == expected);
 
-  //3 files, 2 nt
+  //3 files, 2 nt.
   expected = { 0, 0, 2 };
   REQUIRE(ntFromFile(3, 2) == expected);
 
-  //3 files, 3 nt
+  //3 files, 3 nt.
   expected = { 1, 1, 1 };
   REQUIRE(ntFromFile(3, 3) == expected);
 
-  //3 files, 13 nt
+  //3 files, 13 nt.
   expected = { 4, 4, 5 };
   REQUIRE(ntFromFile(3, 13) == expected);
 
-  //3 files, 12 nt
+  //3 files, 12 nt.
   expected = { 4, 4, 4 };
   REQUIRE(ntFromFile(3, 12) == expected);
 
-  //3 files, 11 nt
+  //3 files, 11 nt.
   expected = { 3, 3, 5 };
   REQUIRE(ntFromFile(3, 11) == expected);
 
-  //3 files, 10 nt
+  //3 files, 10 nt.
   expected = { 3, 3, 4 };
   REQUIRE(ntFromFile(3, 10) == expected);
 
-  //3 files, 9 nt
+  //3 files, 9 nt.
   expected = { 3, 3, 3 };
   REQUIRE(ntFromFile(3, 9) == expected);
 
-  // 3 files, 0 nt (we only use the UMI)
+  // 3 files, 0 nt (we only use the UMI).
   expected = { 0, 0, 0 };
   REQUIRE(ntFromFile(3, 0) == expected);
 }

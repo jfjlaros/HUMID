@@ -1,11 +1,11 @@
 Installation
 ============
 
-You can download a static binary directly from github_, or use any of the
+You can download a static binary directly from GitHub_, or use any of the
 alternative installation methods listed below
 
 
-From conda_
+From Conda_
 -----------
 
 ::
@@ -41,5 +41,5 @@ Static compilation
     cd ../../src
     make static
 
-.. _conda: https://anaconda.org/bioconda/humid
-.. _github: https://github.com/jfjlaros/HUMID/releases
+.. _Conda: https://anaconda.org/bioconda/humid
+.. _GitHub: https://github.com/jfjlaros/HUMID/releases

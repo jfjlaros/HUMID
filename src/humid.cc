@@ -1,7 +1,7 @@
 #include <filesystem>
+#include <format>
 #include <string>
 #include <tuple>
-#include <format>
 
 #include "../lib/commandIO/src/commandIO.h"
 #include "../lib/fastp/src/writer.h"
@@ -13,6 +13,7 @@
 #include "log.h"
 
 using std::filesystem::create_directories;
+using std::format;
 using std::ios;
 using std::tie;
 
@@ -42,17 +43,17 @@ tuple<size_t, vector<size_t>> preCompute(
   // Peek at the header of the first read in the first file to get the UMI size.
   size_t headerUMISize {peekUMI(files.front())};
 
-  // Ensure we do not take negative nucleotides from the files
-  size_t fromFile = 0;
+  // Ensure we do not take a negative amount of nucleotides from the files.
+  size_t fromFile {0};
   if (wordLength > headerUMISize) {
     fromFile = wordLength - headerUMISize;
   }
 
-  // Calculate how many nucleotes to take from each read. Any remainder will be
-  // taken from the last file.
+  // Calculate how many nucleotides to take from each read. Any remainder will
+  // be taken from the last file.
   vector<size_t> ntToTake {ntFromFile(files.size(), fromFile)};
 
-  // Ensure we do not take more than wordLength from the UMI header
+  // Ensure we do not take more than `wordLength` from the UMI header.
   if (wordLength < headerUMISize) {
     headerUMISize = wordLength;
   }
@@ -82,12 +83,11 @@ tuple<size_t, size_t> readData(
   time_t nt_start {startMessage(log, "Determing nucleotides to take")};
   endMessage(log, nt_start);
 
-  // Print the nucleotides to take from UMI and each file
-  string msg = std::format("header: {}", headerUMISize);
+  // Print the nucleotides to take from UMI and each file.
+  string msg = format("header: {}", headerUMISize);
   size_t i {1};
   for (size_t nt: ntToTake) {
-    msg += std::format("\nfile{}: {}", i, nt);
-    i++;
+    msg += format("\nfile{}: {}", i++, nt);
   }
   log << msg.c_str() << "\n";
 
