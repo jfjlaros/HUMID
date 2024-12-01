@@ -1,6 +1,6 @@
-=====
+=========================================
 HUMID: reference free FastQ deduplication
-=====
+=========================================
 
 .. image:: https://img.shields.io/github/last-commit/jfjlaros/HUMID.svg
    :target: https://github.com/jfjlaros/HUMID/graphs/commit-activity

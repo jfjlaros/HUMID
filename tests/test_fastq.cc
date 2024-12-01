@@ -148,6 +148,10 @@ TEST_CASE("Test dividing nucleotides over files") {
   //3 files, 9 nt
   expected = { 3, 3, 3 };
   REQUIRE(ntFromFile(3, 9) == expected);
+
+  // 3 files, 0 nt (we only use the UMI)
+  expected = { 0, 0, 0 };
+  REQUIRE(ntFromFile(3, 0) == expected);
 }
 
 TEST_CASE("Test extracting only the large UMI from the header"){
