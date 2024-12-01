@@ -4,12 +4,10 @@ build:
   os: "ubuntu-22.04"
   tools:
     python: "3.9"
-  apt_packages:
-    - libisal-dev
-  jobs:
-    pre_build:
-      - git submodule update --init --recursive
-      - make -C src doc
+
+python:
+  install:
+    - requirements: docs/requirements.txt
 
 sphinx:
   configuration: docs/conf.py
