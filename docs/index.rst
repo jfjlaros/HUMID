@@ -8,5 +8,6 @@
    install
    cli
    usage
+   output
    troubleshooting
    credits

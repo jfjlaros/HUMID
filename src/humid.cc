@@ -174,7 +174,7 @@ vector<Cluster*> findClusters(
     start = startMessage(log, "Calculating directional clusters");
   }
   vector<Cluster*> clusters;
-  size_t id {0};
+  size_t id {1};
   for (Result<NLeaf> const& result: trie.walk()) {
     if (not result.leaf->cluster) {
       Cluster* cluster {new Cluster {id++}};
@@ -267,14 +267,20 @@ void writeAnnotated(
 
   for (vector<Read*> const& reads: readFiles(files)) {
     Word word {makeWord(reads, ntToTake, headerUMISize)};
+
+    // Cluster ID 0 is special, and reserved for reads that could not be clustered
+    size_t cluster_id = {0};
+
+    // For reads that have been clustered, we find the cluster ID in the trie
     if (not word.filtered) {
       Node<4, NLeaf>* node {trie.find(word.data)};
+      cluster_id = node->leaf->cluster->id;
+    }
 
-      for (size_t i {0}; i < reads.size(); i++) {
-        *reads[i]->mName += ':' + to_string(node->leaf->cluster->id);
-        string s {reads[i]->toString()};
-        outFiles[i]->write(s.c_str(), s.size());
-      }
+    for (size_t i {0}; i < reads.size(); i++) {
+      *reads[i]->mName += ':' + to_string(cluster_id);
+      string s {reads[i]->toString()};
+      outFiles[i]->write(s.c_str(), s.size());
     }
   }
 
