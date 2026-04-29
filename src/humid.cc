@@ -269,7 +269,7 @@ void writeAnnotated(
     Word word {makeWord(reads, ntToTake, headerUMISize)};
 
     // Cluster ID 0 is special, and reserved for reads that could not be clustered
-    size_t cluster_id = {0};
+    size_t cluster_id {0};
 
     // For reads that have been clustered, we find the cluster ID in the trie
     if (not word.filtered) {
