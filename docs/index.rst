@@ -6,6 +6,7 @@
 
    introduction
    install
+   tutorial
    cli
    usage
    output
