@@ -31,7 +31,7 @@ corrupted during the download
 Run HUMID
 ---------
 Next, we will analyze the FASTQ files with HUMID. Note that these files do not
-contain an UMI, but HUMID will detect this and use the sequences from the reads
+contain a UMI, but HUMID will detect this and use the sequences from the reads
 themselves to detect duplicates.
 
 The following command will run HUMID and write the deduplicated FASTQ files and
