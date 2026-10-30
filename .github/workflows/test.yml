@@ -1,0 +1,23 @@
+name: Test
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install make
+          make -C src deps
+      - name: Test with catch
+        run: |
+          make -C tests check

@@ -1,9 +1,19 @@
 version: 2
 
 build:
-  os: "ubuntu-22.04"
+  os: ubuntu-lts-latest
+  apt_packages:
+    - catch
+    - g++
+    - libdeflate-dev
+    - libisal-dev
+    - valgrind
+  jobs:
+    pre_build:
+      - git submodule update --init --recursive
+      - make -C src doc
   tools:
-    python: "3.9"
+    python: latest
 
 python:
   install:

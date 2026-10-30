@@ -10,7 +10,7 @@ PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
 
 CXX ?= g++
-CC_ARGS := -O2 -std=c++20
+CC_ARGS := -std=c++20 -Wall -Wextra -pedantic
 
 # Compatibility for MacOS
 UNAME_S := $(shell uname -s)
@@ -23,18 +23,25 @@ ifeq ($(UNAME_S),Darwin)
 	CC_ARGS += -fcoroutines-ts -D_LIBCPP_DISABLE_AVAILABILITY
 endif
 
-LDFLAGS += -lisal -ldeflate
-LD_STATIC_ARGS := -L../lib/isa-l/.libs/ -static
+LIBISA := isal
+LIBISA_PATH := ../lib/isa-l
+LIBISA_LIB_PATH := $(LIBISA_PATH)/.libs
+LDFLAGS += -l$(LIBISA) -ldeflate
+LD_STATIC_ARGS := -L$(LIBISA_LIB_PATH) -static
 
 
 OBJS := $(addsuffix .o, $(LIBS))
 
-.PHONY: clean distclean doc
+.PHONY: clean deps distclean doc
 
 
 all: $(EXEC)
 
-static: $(MAIN) $(OBJS)
+
+$(LIBISA_LIB_PATH)/$(LIBISA).a:
+	cd $(LIBISA_PATH) && ./autogen.sh && ./configure && make
+
+static: $(MAIN) $(OBJS) | $(LIBISA_LIB_PATH)/lib$(LIBISA).a
 	$(CXX) $(CC_ARGS) -o $@ $^ $(LDFLAGS) $(LD_STATIC_ARGS)
 
 $(EXEC): $(MAIN) $(OBJS)
@@ -51,6 +58,9 @@ $(EXEC): $(MAIN) $(OBJS)
 
 clean:
 	rm -f $(OBJS)
+
+deps:
+	sudo apt install catch g++ libdeflate-dev libisal-dev nasm valgrind
 
 distclean: clean
 	rm -f $(EXEC) static
