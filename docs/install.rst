@@ -18,15 +18,15 @@ From source
 ::
 
     git clone https://github.com/jfjlaros/HUMID.git
-    cd HUMID
+    cd HUMID/src
     git submodule update --recursive --init
+    make deps
 
 Compilation
 ~~~~~~~~~~~
 
 ::
 
-    cd src
     make
 
 Static compilation
@@ -34,11 +34,6 @@ Static compilation
 
 ::
 
-    cd lib/isa-l
-    ./autogen.sh
-    ./configure
-    make
-    cd ../../src
     make static
 
 .. _Conda: https://anaconda.org/bioconda/humid

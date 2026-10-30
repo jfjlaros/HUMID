@@ -4,8 +4,8 @@ HUMID: reference free FastQ deduplication
 
 .. image:: https://img.shields.io/github/last-commit/jfjlaros/HUMID.svg
    :target: https://github.com/jfjlaros/HUMID/graphs/commit-activity
-.. image:: https://github.com/jfjlaros/HUMID/actions/workflows/cpp-library.yml/badge.svg
-   :target: https://github.com/jfjlaros/HUMID/actions/workflows/cpp-library.yml
+.. image:: https://github.com/jfjlaros/HUMID/actions/workflows/test.yml/badge.svg
+   :target: https://github.com/jfjlaros/HUMID/actions/workflows/test.yml
 .. image:: https://readthedocs.org/projects/HUMID/badge/?version=latest
    :target: https://HUMID.readthedocs.io/en/latest
 .. image:: https://img.shields.io/github/release-date/jfjlaros/HUMID.svg
