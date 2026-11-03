@@ -10,7 +10,7 @@ From Conda_
 
 ::
 
-    conda install humid
+    conda install -c conda-forge -c bioconda --override-channels --strict-channel-priority humid
 
 From source
 -----------
