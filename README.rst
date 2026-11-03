@@ -33,7 +33,7 @@ You can install HUMID from conda
 
 .. code-block:: bash
 
-    conda install -c bioconda humid
+    conda install -c conda-forge -c bioconda --override-channels --strict-channel-priority humid
 
 If you want to, you can also install HUMID `from source <https://humid.readthedocs.io/en/latest/install.html#from-source>`_.
 
